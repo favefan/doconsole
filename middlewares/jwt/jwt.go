@@ -1,6 +1,8 @@
 package jwt
 
 import (
+	"gitee.com/favefan/doconsole/pkg/app"
+	"gitee.com/favefan/doconsole/pkg/e"
 	"net/http"
 	"time"
 
@@ -11,29 +13,25 @@ import (
 // JWT is a token auth func.
 func JWT() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		appG := app.Gin{C: c}
 		var code int
 		var data interface{}
 
 		code = http.StatusOK
-		token := c.Query("token")
-		if token == "" {
+		tokenString := c.GetHeader("Access-Token") //Query("token")
+		if tokenString == "" {
 			code = http.StatusBadRequest
 		} else {
-			claims, err := util.ParseToken(token)
+			claims, err := util.ParseToken(tokenString)
 			if err != nil {
-				code = 1 //e.ERROR_AUTH_CHECK_TOKEN_FAIL
+				code = e.ErrorAuthCheckTokenFail
 			} else if time.Now().Unix() > claims.ExpiresAt {
-				code = 2 //e.ERROR_AUTH_CHECK_TOKEN_TIMEOUT
+				code = e.ErrorAuthCheckTokenFail
 			}
 		}
 
 		if code != http.StatusOK {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": code,
-				//"msg" : e.GetMsg(code),
-				"data": data,
-			})
-
+			appG.Response(http.StatusUnauthorized, code, data)
 			c.Abort()
 			return
 		}

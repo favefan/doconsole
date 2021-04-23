@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"gitee.com/favefan/doconsole/models"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +17,7 @@ import (
 
 func main() {
 	setting.Setup()
-	//models.Setup()
+	models.Setup()
 
 	router := routers.InitRouter()
 

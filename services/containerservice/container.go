@@ -20,30 +20,6 @@ type Container struct {
 	Platform         v1.Platform
 }
 
-// List returns the list of containers in the docker host.
-func List() ([]types.Container, error) {
-	ctx := context.Background()
-
-	// Create API client
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		return nil, err
-	}
-	defer cli.Close()
-
-	// Get containers list
-	containers, err := cli.ContainerList(ctx,
-		types.ContainerListOptions{
-			All:  true,
-			Size: true,
-		})
-	if err != nil {
-		return nil, err
-	}
-
-	return containers, nil
-}
-
 func (c *Container) Create() (container.ContainerCreateCreatedBody, error) {
 	ctx := context.Background()
 
