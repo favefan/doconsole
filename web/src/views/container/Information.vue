@@ -1,0 +1,436 @@
+<template>
+  <page-header-wrapper
+    class="container-name"
+    :title="data.Name"
+    :tab-list="tabList"
+    :tab-active-key="tabActiveKey"
+    @tabChange="handleTabChange"
+  >
+
+    <template v-slot:content>
+      <a-descriptions size="default" :column="1"> <!-- isMobile ? 1 : 2 -->
+        <a-descriptions-item label="Id">{{ data.Id }}</a-descriptions-item>
+        <a-descriptions-item label="创建时间">{{ data.Created }}</a-descriptions-item>
+        <a-descriptions-item label="启动时间">{{ data.State.StartedAt }}</a-descriptions-item>
+        <a-descriptions-item label="无">
+          <a href="">无</a>
+        </a-descriptions-item>
+      </a-descriptions>
+    </template>
+
+    <!-- OperationButtonGroup -->
+    <template v-slot:extra>
+      <a-button
+        type="circle"
+        size="large"
+        icon="code"
+        title="CLI"
+        :disabled="data.State.Status === 'running' ? false : true"
+      ></a-button>
+      <a-button
+        type="circle"
+        size="large"
+        :icon="data.State.Status === 'running' ? 'poweroff' : 'caret-right'"
+        @click="data.State.Status === 'running' ? stop(item.Id) : start(item.Id)"
+        title="启动或停止"
+      ></a-button>
+      <a-button
+        type="circle"
+        size="large"
+        icon="reload"
+        @click="restart(data.Id)"
+        :disabled="data.State.Status === 'running' ? false : true"
+        title="重启"
+      ></a-button>
+      <a-popconfirm
+        placement="bottomLeft"
+        title="确定删除这个容器?"
+        ok-text="是"
+        cancel-text="我再想想"
+        @confirm="confirm(item.Id)"
+      > <!-- @cancel="cancel" -->
+        <a-button type="circle" size="large" icon="delete" title="删除"></a-button>
+      </a-popconfirm></template>
+
+    <!-- Status under OperationButtonGroup -->
+    <template v-slot:extraContent>
+      <a-row class="status-list">
+        <a-col :xs="12" :sm="12">
+          <div class="text">状态</div>
+          <div class="heading">{{ data.State.Status }}</div>
+        </a-col>
+        <a-col :xs="12" :sm="12">
+          <div class="text">Pid</div>
+          <div class="heading">{{ data.State.Pid }}</div>
+        </a-col>
+      </a-row>
+    </template>
+
+    <!-- tabList: [
+    { key: 'detail', tab: '详细' },
+    { key: 'logs', tab: '日志' },
+    { key: 'stats', tab: '资源' },
+    { key: 'cli', tab: '连接' },
+    { key: 'attach', tab: '跟踪' }
+    ], -->
+
+    <div
+      v-if="tabActiveKey === 'detail'"
+    >
+      <a-card style="margin-top: 24px" :bordered="false" title="用户信息">
+        <a-descriptions>
+          <a-descriptions-item label="用户姓名">付晓晓</a-descriptions-item>
+          <a-descriptions-item label="会员卡号">32943898021309809423</a-descriptions-item>
+          <a-descriptions-item label="身份证">3321944288191034921</a-descriptions-item>
+          <a-descriptions-item label="联系方式">18112345678</a-descriptions-item>
+          <a-descriptions-item label="联系地址">浙江省杭州市西湖区黄姑山路工专路交叉路口</a-descriptions-item>
+        </a-descriptions>
+        <a-descriptions title="信息组">
+          <a-descriptions-item label="某某数据">725</a-descriptions-item>
+          <a-descriptions-item label="该数据更新时间">2018-08-08</a-descriptions-item>
+          <a-descriptions-item ></a-descriptions-item>
+          <a-descriptions-item label="某某数据">725</a-descriptions-item>
+          <a-descriptions-item label="该数据更新时间">2018-08-08</a-descriptions-item>
+          <a-descriptions-item ></a-descriptions-item>
+        </a-descriptions>
+        <a-card type="inner" title="多层信息组">
+          <a-descriptions title="组名称" size="small">
+            <a-descriptions-item label="负责人">林东东</a-descriptions-item>
+            <a-descriptions-item label="角色码">1234567</a-descriptions-item>
+            <a-descriptions-item label="所属部门">XX公司-YY部</a-descriptions-item>
+            <a-descriptions-item label="过期时间">2018-08-08</a-descriptions-item>
+            <a-descriptions-item label="描述">这段描述很长很长很长很长很长很长很长很长很长很长很长很长很长很长...</a-descriptions-item>
+          </a-descriptions>
+          <a-divider style="margin: 16px 0" />
+          <a-descriptions title="组名称" size="small" :col="1">
+            <a-descriptions-item label="学名">	Citrullus lanatus (Thunb.) Matsum. et Nakai一年生蔓生藤本；茎、枝粗壮，具明显的棱。卷须较粗..</a-descriptions-item>
+          </a-descriptions>
+          <a-divider style="margin: 16px 0" />
+          <a-descriptions title="组名称" size="small" :col="2">
+            <a-descriptions-item label="负责人">付小小</a-descriptions-item>
+            <a-descriptions-item label="角色码">1234567</a-descriptions-item>
+          </a-descriptions>
+        </a-card>
+
+      </a-card>
+
+    </div>
+
+    <div
+      v-if="tabActiveKey === 'logs'"
+    >
+      <a-card style="margin-top: 24px" :bordered="false" title="用户近半年来电记录">
+        <div class="no-data"><a-icon type="frown-o"/>暂无数据</div>
+      </a-card>
+    </div>
+
+    <div
+      v-if="tabActiveKey === 'stats'"
+    >
+      <a-card
+        style="margin-top: 24px"
+        :bordered="false"
+        :tabList="operationTabList"
+        :activeTabKey="operationActiveTabKey"
+        @tabChange="(key) => {this.operationActiveTabKey = key}"
+      >
+        <a-table
+          v-if="operationActiveTabKey === '1'"
+          :columns="operationColumns"
+          :dataSource="operation1"
+          :pagination="false"
+        >
+          <template
+            slot="status"
+            slot-scope="status">
+            <a-badge :status="status | statusTypeFilter" :text="status | statusFilter"/>
+          </template>
+        </a-table>
+        <a-table
+          v-if="operationActiveTabKey === '2'"
+          :columns="operationColumns"
+          :dataSource="operation2"
+          :pagination="false"
+        >
+          <template
+            slot="status"
+            slot-scope="status">
+            <a-badge :status="status | statusTypeFilter" :text="status | statusFilter"/>
+          </template>
+        </a-table>
+        <a-table
+          v-if="operationActiveTabKey === '3'"
+          :columns="operationColumns"
+          :dataSource="operation3"
+          :pagination="false"
+        >
+          <template
+            slot="status"
+            slot-scope="status">
+            <a-badge :status="status | statusTypeFilter" :text="status | statusFilter"/>
+          </template>
+        </a-table>
+      </a-card>
+    </div>
+
+    <div
+      v-if="tabActiveKey === 'cli'"
+    >
+    </div>
+
+    <div
+      v-if="tabActiveKey === 'attach'"
+    >
+    </div>
+
+  </page-header-wrapper>
+</template>
+
+<script>
+import { baseMixin } from '@/store/app-mixin'
+import {
+  ContainerInspect
+} from '@/api/containers'
+
+export default {
+  name: 'ContainerInformation',
+  mixins: [baseMixin],
+  data () {
+    return {
+      data: {
+        Args: [],
+        State: {},
+        HostConfig: {},
+        Mounts: [],
+        Config: {},
+        NetworkSettings: {}
+      },
+      tabList: [
+        { key: 'detail', tab: '详细' },
+        { key: 'logs', tab: '日志' },
+        { key: 'stats', tab: '资源' },
+        { key: 'cli', tab: '连接' },
+        { key: 'attach', tab: '跟踪' }
+      ],
+      tabActiveKey: 'detail',
+
+      operationTabList: [
+        {
+          key: '1',
+          tab: '操作日志一'
+        },
+        {
+          key: '2',
+          tab: '操作日志二'
+        },
+        {
+          key: '3',
+          tab: '操作日志三'
+        }
+      ],
+      operationActiveTabKey: '1',
+
+      operationColumns: [
+        {
+          title: '操作类型',
+          dataIndex: 'type',
+          key: 'type'
+        },
+        {
+          title: '操作人',
+          dataIndex: 'name',
+          key: 'name'
+        },
+        {
+          title: '执行结果',
+          dataIndex: 'status',
+          key: 'status',
+          scopedSlots: { customRender: 'status' }
+        },
+        {
+          title: '操作时间',
+          dataIndex: 'updatedAt',
+          key: 'updatedAt'
+        },
+        {
+          title: '备注',
+          dataIndex: 'remark',
+          key: 'remark'
+        }
+      ],
+      operation1: [
+        {
+          key: 'op1',
+          type: '订购关系生效',
+          name: '曲丽丽',
+          status: 'agree',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '-'
+        },
+        {
+          key: 'op2',
+          type: '财务复审',
+          name: '付小小',
+          status: 'reject',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '不通过原因'
+        },
+        {
+          key: 'op3',
+          type: '部门初审',
+          name: '周毛毛',
+          status: 'agree',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '-'
+        },
+        {
+          key: 'op4',
+          type: '提交订单',
+          name: '林东东',
+          status: 'agree',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '很棒'
+        },
+        {
+          key: 'op5',
+          type: '创建订单',
+          name: '汗牙牙',
+          status: 'agree',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '-'
+        }
+      ],
+      operation2: [
+        {
+          key: 'op2',
+          type: '财务复审',
+          name: '付小小',
+          status: 'reject',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '不通过原因'
+        },
+        {
+          key: 'op3',
+          type: '部门初审',
+          name: '周毛毛',
+          status: 'agree',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '-'
+        },
+        {
+          key: 'op4',
+          type: '提交订单',
+          name: '林东东',
+          status: 'agree',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '很棒'
+        }
+      ],
+      operation3: [
+        {
+          key: 'op2',
+          type: '财务复审',
+          name: '付小小',
+          status: 'reject',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '不通过原因'
+        },
+        {
+          key: 'op3',
+          type: '部门初审',
+          name: '周毛毛',
+          status: 'agree',
+          updatedAt: '2017-10-03  19:23:12',
+          remark: '-'
+        }
+      ]
+    }
+  },
+  created () {
+    const { $message } = this
+    ContainerInspect(this.$route.query.id)
+      .then((res) => {
+        this.data = res.data
+        console.log(this.data)
+      })
+      .catch((err) => {
+        $message.error(`获取容器信息失败: ${err.message}`)
+      })
+  },
+  filters: {
+    statusFilter (status) {
+      const statusMap = {
+        'agree': '成功',
+        'reject': '驳回'
+      }
+      return statusMap[status]
+    },
+    statusTypeFilter (type) {
+      const statusTypeMap = {
+        'agree': 'success',
+        'reject': 'error'
+      }
+      return statusTypeMap[type]
+    }
+  },
+  methods: {
+    handleTabChange (key) {
+      console.log('')
+      this.tabActiveKey = key
+    }
+  }
+}
+</script>
+
+<style lang="less" scoped>
+
+  .container-name /deep/ .ant-page-header-heading-title {
+    display: block;
+    float: left;
+    margin-bottom: 5px;
+    padding-right: 12px;
+    color: rgba(0, 0, 0, 0.85);
+    font-weight: 600;
+    font-size: 35px;
+    line-height: 45px;
+  }
+
+  .detail-layout {
+    margin-left: 44px;
+  }
+  .text {
+    font-size: 120%;
+    color: rgba(0, 0, 0, .45);
+  }
+
+  .heading {
+    color: rgba(0, 0, 0, .85);
+    font-size: 25px;
+  }
+
+  .no-data {
+    color: rgba(0, 0, 0, .25);
+    text-align: center;
+    line-height: 64px;
+    font-size: 16px;
+
+    i {
+      font-size: 24px;
+      margin-right: 16px;
+      position: relative;
+      top: 3px;
+    }
+  }
+
+  .mobile {
+    .detail-layout {
+      margin-left: unset;
+    }
+    .text {
+
+    }
+    .status-list {
+      text-align: right;
+    }
+  }
+</style>
