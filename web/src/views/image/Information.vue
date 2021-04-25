@@ -31,7 +31,7 @@
       </a-row>
     </template>
 
-    <a-card style="margin-top: 24px" :bordered="false" title="用户近半年来电记录">
+    <a-card style="margin-top: 24px" :bordered="false" title="Image history">
       <div class="no-data"><a-icon type="frown-o"/>暂无数据</div>
     </a-card>
 
