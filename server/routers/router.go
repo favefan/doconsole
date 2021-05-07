@@ -31,13 +31,29 @@ func InitRouter() *gin.Engine {
 			apiV1.GET("/containers/stop", v1.ContainerStop)
 			apiV1.GET("/containers/restart", v1.ContainerRestart)
 			apiV1.GET("/containers/pause", v1.ContainerPause)
-			apiV1.GET("/containers/remove", v1.ContainerRemove)
+			apiV1.DELETE("/containers/:id", v1.ContainerRemove)
 			apiV1.POST("/containers/create", v1.CreateContainer)
 		}
 		// images
 		{
 			apiV1.GET("/images/json", v1.ImageList)
+			apiV1.GET("/images/search", v1.ImageSearch)
 			apiV1.GET("/images/json/:id", v1.ImageInspect)
+			apiV1.GET("/images/history/:id", v1.ImageHistory)
+			apiV1.GET("/images/pull", v1.ImagePull)
+			apiV1.DELETE("/images/:id", v1.ImageRemove)
+			apiV1.GET("/distribution/json/:id", v1.ImageInspectFromRegistry)
+		}
+		// networks
+		{
+			apiV1.GET("/networks/json", v1.NetworkList)
+			apiV1.GET("/networks/json/:id", v1.NetworkInspect)
+			apiV1.POST("/networks/create", v1.NetworkCreate)
+			apiV1.DELETE("/networks", v1.NetworksRemove)
+		}
+		// volumes
+		{
+			apiV1.GET("/volumes/json", v1.VolumeList)
 		}
 	}
 

@@ -43,6 +43,10 @@ export default {
     'menu.image': '镜像管理',
     'menu.image.images': '镜像列表',
     'menu.image.information': '镜像详情',
-    'menu.container.networks': '网络',
-    'menu.container.volumes': '卷'
+    'menu.network': '网络管理',
+    'menu.network.networks': '网络列表',
+    'menu.network.information': '网络详情',
+    'menu.volume': '卷管理',
+    'menu.volume.volumes': '卷列表',
+    'menu.volume.information': '卷详情'
 }

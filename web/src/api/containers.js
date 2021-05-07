@@ -50,8 +50,8 @@ export function ContainerRestart (id) {
 
 export function ContainerRemove (id) {
   return request({
-      url: `${api.base}/remove?id=${id}`,
-      method: 'get'
+      url: `${api.base}/${id}`,
+      method: 'delete'
   })
 }
 

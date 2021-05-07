@@ -28,6 +28,7 @@ func ContainerList(c *gin.Context) {
 			e.ErrorDockerDaemonConnectionFailed,
 			nil,
 		)
+		return
 	}
 	defer cli.Close()
 
@@ -42,6 +43,7 @@ func ContainerList(c *gin.Context) {
 			e.Error,
 			nil,
 		)
+		return
 	}
 
 	appG.Response(http.StatusOK, e.Success, containers)
@@ -61,6 +63,7 @@ func ContainerInspect(c *gin.Context) {
 			e.ErrorDockerDaemonConnectionFailed,
 			nil,
 		)
+		return
 	}
 	defer cli.Close()
 
@@ -71,6 +74,7 @@ func ContainerInspect(c *gin.Context) {
 			e.Error,
 			nil,
 		)
+		return
 	}
 
 	appG.Response(http.StatusOK, e.Success, container)
@@ -89,6 +93,7 @@ func ContainerStart(c *gin.Context) {
 			e.ErrorDockerDaemonConnectionFailed,
 			nil,
 		)
+		return
 	}
 	defer cli.Close()
 
@@ -99,6 +104,7 @@ func ContainerStart(c *gin.Context) {
 			e.Error,
 			nil,
 		)
+		return
 	}
 
 	appG.Response(http.StatusOK, e.Success, nil)
@@ -117,6 +123,7 @@ func ContainerStop(c *gin.Context) {
 			e.ErrorDockerDaemonConnectionFailed,
 			nil,
 		)
+		return
 	}
 	defer cli.Close()
 
@@ -127,6 +134,7 @@ func ContainerStop(c *gin.Context) {
 			e.Error,
 			nil,
 		)
+		return
 	}
 
 	appG.Response(http.StatusOK, e.Success, nil)
@@ -145,6 +153,7 @@ func ContainerPause(c *gin.Context) {
 			e.ErrorDockerDaemonConnectionFailed,
 			nil,
 		)
+		return
 	}
 	defer cli.Close()
 
@@ -155,6 +164,7 @@ func ContainerPause(c *gin.Context) {
 			e.Error,
 			nil,
 		)
+		return
 	}
 
 	appG.Response(http.StatusOK, e.Success, nil)
@@ -173,6 +183,7 @@ func ContainerRestart(c *gin.Context) {
 			e.ErrorDockerDaemonConnectionFailed,
 			nil,
 		)
+		return
 	}
 	defer cli.Close()
 
@@ -183,6 +194,7 @@ func ContainerRestart(c *gin.Context) {
 			e.Error,
 			nil,
 		)
+		return
 	}
 
 	appG.Response(http.StatusOK, e.Success, nil)
@@ -192,7 +204,7 @@ func ContainerRestart(c *gin.Context) {
 func ContainerRemove(c *gin.Context) {
 	appG := app.Gin{C: c}
 	ctx := context.Background()
-	containerID := c.Query("id")
+	containerID := c.Param("id")
 
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -201,6 +213,7 @@ func ContainerRemove(c *gin.Context) {
 			e.ErrorDockerDaemonConnectionFailed,
 			nil,
 		)
+		return
 	}
 	defer cli.Close()
 
@@ -215,6 +228,7 @@ func ContainerRemove(c *gin.Context) {
 			e.Error,
 			nil,
 		)
+		return
 	}
 
 	appG.Response(http.StatusOK, e.Success, nil)

@@ -1,6 +1,6 @@
 // eslint-disable-next-line
-import { UserLayout, BasicLayout, BlankLayout } from '@/layouts'
-import { containers, images, dashboard } from '@/core/icons' // repository, volume, network, host
+import { UserLayout, BasicLayout } from '@/layouts'
+import { containers, images, dashboard, network } from '@/core/icons' // repository, volume, network, host
 
 const RouteView = {
   name: 'RouteView',
@@ -85,6 +85,52 @@ export const asyncRouterMap = [
             name: 'ImageInformation',
             component: () => import('@/views/image/Information'),
             meta: { title: 'menu.image.information', keepAlive: false },
+            hidden: true
+          }
+        ]
+      },
+      // 网络管理
+      {
+        path: '/network',
+        name: 'network',
+        redirect: '/network/networks',
+        component: RouteView,
+        meta: { title: 'menu.network', icon: network, keepAlive: true },
+        children: [
+          {
+            path: '/network/networks',
+            name: 'Networks',
+            component: () => import('@/views/network/Networks'),
+            meta: { title: 'menu.network.networks', keepAlive: true }
+          },
+          {
+            path: '/network/information',
+            name: 'NetworkInformation',
+            component: () => import('@/views/network/Information'),
+            meta: { title: 'menu.network.information', keepAlive: false },
+            hidden: true
+          }
+        ]
+      },
+      // 卷管理
+      {
+        path: '/volume',
+        name: 'volume',
+        redirect: '/volume/volumes',
+        component: RouteView,
+        meta: { title: 'menu.volume', icon: network, keepAlive: true },
+        children: [
+          {
+            path: '/volume/volumes',
+            name: 'Volumes',
+            component: () => import('@/views/volume/Volumes'),
+            meta: { title: 'menu.volume.volumes', keepAlive: true }
+          },
+          {
+            path: '/volume/information',
+            name: 'VolumeInformation',
+            component: () => import('@/views/volume/Information'),
+            meta: { title: 'menu.volume.information', keepAlive: false },
             hidden: true
           }
         ]

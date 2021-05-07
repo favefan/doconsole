@@ -19,3 +19,24 @@ export function ImageInspect (id) {
       method: 'get'
   })
 }
+
+export function ImageRemove (id) {
+  return request({
+      url: `${api.base}/${id}`,
+      method: 'delete'
+  })
+}
+
+export function ImageHistory (e) {
+  return request({
+      url: `${api.base}/history/${e}`,
+      method: 'get'
+  })
+}
+
+export function ImageSearch (e) {
+  return request({
+      url: `${api.base}/search?term=${e}`,
+      method: 'get'
+  })
+}
