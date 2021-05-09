@@ -2,43 +2,42 @@ package models
 
 import "log"
 
-type Registry struct {
+type Host struct {
 	Model
 	Name string `gorm:"unique;not null";form:"Name"`
-	URL string `gorm:"default:'#';not null";form:"URL"`
-	NeedAuth bool `gorm:"default:false;not null";form:"NeedAuth"`
-	Username string `form:"Username"`
-	Password string	`form:"Password"`
-	Comment string `form:"Comment"`
+	ViaSocket bool `gorm:"default:false;not null";form:"ViaSocket"`
+	DockerEngineURL string `gorm:"default:'#'";form:"URL"`
+	HostIP string `gorm:"default:'#'";form:"HostIP"`
+	TLS bool `gorm:"default:false;not null";form:"TLS"`
 }
 
-func (registry *Registry) Create() error {
-	if err := db.Create(registry).Error; err != nil {
+func (host *Host) Create() error {
+	if err := db.Create(host).Error; err != nil {
 		log.Println(err)
 		return err
 	}
 	return nil
 }
 
-func (*Registry) Get(id int) (interface{}, error) {
+func (*Host) Get(id int) (interface{}, error) {
 	if id == -1 {
-		var registries []Registry
-		if err := db.Find(&registries).Error; err != nil {
+		var hosts []Host
+		if err := db.Find(&hosts).Error; err != nil {
 			log.Println(err)
 			return nil, err
 		}
-		return registries, nil
+		return hosts, nil
 	}
-	var registry Registry
-	if err := db.First(&registry, id).Error; err != nil {
+	var host Host
+	if err := db.First(&host, id).Error; err != nil {
 		log.Println(err)
 		return nil, err
 	}
-	return registry, nil
+	return host, nil
 }
 
-func (registry *Registry) Update(id interface{}) error {
-	if err := db.Model(&Registry{}).Where("id = ?", id).Updates(registry).Error;
+func (host *Host) Update(id interface{}) error {
+	if err := db.Model(&Host{}).Where("id = ?", id).Updates(host).Error;
 		err != nil {
 		log.Println(err)
 		return err
@@ -46,8 +45,8 @@ func (registry *Registry) Update(id interface{}) error {
 	return nil
 }
 
-func (*Registry) Delete(id interface{}) error {
-	if err := db.Where("id = ?", id).Delete(Registry{}).Error;
+func (*Host) Delete(id interface{}) error {
+	if err := db.Where("id = ?", id).Delete(Host{}).Error;
 		err != nil {
 		log.Println(err)
 		return err

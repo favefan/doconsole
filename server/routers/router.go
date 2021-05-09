@@ -23,6 +23,10 @@ func InitRouter() *gin.Engine {
 	apiV1 := r.Group("/api/v1")
 	// apiV1.Use(jwt.JWT())
 	{
+		// docker engine
+		{
+			apiV1.GET("/docker/endpoint", v1.DaemonHost)
+		}
 		// containers
 		{
 			apiV1.GET("/containers/json", v1.ContainerList)
@@ -61,9 +65,18 @@ func InitRouter() *gin.Engine {
 		// registries
 		{
 			apiV1.POST("/registries/create", v1.RegistryCreate)
+			apiV1.PUT("/registries", v1.RegistryUpdate)
 			apiV1.GET("/registries/json", v1.RegistryList)
 			apiV1.GET("/registries/json/:id", v1.RegistryInspect)
 			apiV1.DELETE("/registries", v1.RegistriesRemove)
+		}
+		// registries
+		{
+			apiV1.POST("/hosts/create", v1.HostCreate)
+			apiV1.PUT("/hosts", v1.HostUpdate)
+			apiV1.GET("/hosts/json", v1.HostList)
+			apiV1.GET("/hosts/json/:id", v1.HostInspect)
+			apiV1.DELETE("/hosts", v1.HostsRemove)
 		}
 	}
 

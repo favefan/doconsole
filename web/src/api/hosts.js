@@ -1,26 +1,26 @@
 import request from '@/utils/request'
 
 const api = {
-  base: 'api/v1/registries'
+  base: 'api/v1/hosts'
 }
 
 export default api
 
-export function RegistryList () {
+export function HostList () {
   return request({
     url: `${api.base}/json`,
     method: 'get'
   })
 }
 
-export function RegistryInspect (id) {
+export function HostInspect (id) {
   return request({
       url: `${api.base}/json/${id}`,
       method: 'get'
   })
 }
 
-export function RegistriesRemove (a) {
+export function HostsRemove (a) {
   return request({
       url: `${api.base}`,
       method: 'delete',
@@ -28,7 +28,7 @@ export function RegistriesRemove (a) {
   })
 }
 
-export function RegistryCreate (values) {
+export function HostCreate (values) {
   return request({
       url: `${api.base}/create`,
       method: 'post',
@@ -36,7 +36,7 @@ export function RegistryCreate (values) {
   })
 }
 
-export function RegistryUpdate (values) {
+export function HostUpdate (values) {
   return request({
       url: `${api.base}`,
       method: 'put',

@@ -51,5 +51,6 @@ export default {
     'menu.volume.information': '卷详情',
     'menu.registry': '仓库管理',
     'menu.registry.registries': '仓库列表',
-    'menu.registry.information': '仓库详情'
+    'menu.host': '主机管理',
+    'menu.host.hosts': '主机列表'
 }

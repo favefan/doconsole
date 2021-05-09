@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import { UserLayout, BasicLayout } from '@/layouts'
-import { containers, images, dashboard, network, volume, registry } from '@/core/icons' // repository, volume, network, host
+import { containers, images, dashboard, network, volume, registry, host } from '@/core/icons' // repository, volume, network, host
 
 const RouteView = {
   name: 'RouteView',
@@ -148,13 +148,22 @@ export const asyncRouterMap = [
             name: 'Registries',
             component: () => import('@/views/registry/Registries'),
             meta: { title: 'menu.registry.registries', keepAlive: true }
-          },
+          }
+        ]
+      },
+      // 主机管理
+      {
+        path: '/host',
+        name: 'host',
+        redirect: '/host/hosts',
+        component: RouteView,
+        meta: { title: 'menu.host', icon: host, keepAlive: true },
+        children: [
           {
-            path: '/registry/information',
-            name: 'RegistryInformation',
-            component: () => import('@/views/registry/Information'),
-            meta: { title: 'menu.registry.information', keepAlive: false },
-            hidden: true
+            path: '/host/hosts',
+            name: 'Hosts',
+            component: () => import('@/views/host/Hosts'),
+            meta: { title: 'menu.host.hosts', keepAlive: true }
           }
         ]
       },

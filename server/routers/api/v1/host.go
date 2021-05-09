@@ -2,7 +2,6 @@ package v1
 
 import (
 	_ "context"
-	"fmt"
 	"gitee.com/favefan/doconsole/models"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
@@ -12,23 +11,22 @@ import (
 	"strconv"
 )
 
-func RegistryCreate(c *gin.Context) {
+func HostCreate(c *gin.Context) {
 	appG := app.Gin{C: c}
 	//ctx := context.Background()
 
 	bodyJson := make(map[string]interface{})
 	c.BindJSON(&bodyJson)
-	registry := models.Registry{
-		Model:    models.Model{},
-		Name:     bodyJson["Name"].(string),
-		URL:      bodyJson["URL"].(string),
-		NeedAuth: bodyJson["NeedAuth"].(bool),
-		Username: bodyJson["Username"].(string),
-		Password: bodyJson["Password"].(string),
-		Comment:  "",
+	host := models.Host{
+		Model: models.Model{},
+		Name: bodyJson["Name"].(string),
+		ViaSocket: bodyJson["ViaSocket"].(bool),
+		DockerEngineURL: bodyJson["DockerEngineURL"].(string),
+		HostIP: bodyJson["HostIP"].(string),
+		TLS: bodyJson["TLS"].(bool),
 	}
 
-	if err := registry.Create(); err != nil {
+	if err := host.Create(); err != nil {
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -46,11 +44,11 @@ func RegistryCreate(c *gin.Context) {
 
 }
 
-func RegistryList(c *gin.Context) {
+func HostList(c *gin.Context) {
 	appG := app.Gin{C: c}
 
-	var registry models.Registry
-	list, err := registry.Get(-1)
+	var host models.Host
+	list, err := host.Get(-1)
 	if err != nil {
 		appG.Response(http.StatusInternalServerError, e.Error, nil)
 		return
@@ -60,12 +58,12 @@ func RegistryList(c *gin.Context) {
 	return
 }
 
-func RegistryInspect(c *gin.Context) {
+func HostInspect(c *gin.Context) {
 	appG := app.Gin{C: c}
-	registryID, err := strconv.Atoi(c.Param("id"))
+	hostID, err := strconv.Atoi(c.Param("id"))
 
-	var registry models.Registry
-	list, err := registry.Get(registryID)
+	var host models.Host
+	list, err := host.Get(hostID)
 	if err != nil {
 		log.Println(err)
 		appG.Response(http.StatusInternalServerError, e.Error, nil)
@@ -76,7 +74,7 @@ func RegistryInspect(c *gin.Context) {
 	return
 }
 
-func RegistriesRemove(c *gin.Context) {
+func HostsRemove(c *gin.Context) {
 	appG := app.Gin{C: c}
 
 	var arr []int
@@ -86,9 +84,9 @@ func RegistriesRemove(c *gin.Context) {
 	c.BindJSON(&json)
 	// fmt.Println(json)
 
-	var registry models.Registry
+	var host models.Host
 	for _, v := range json["array"] {
-		if err := registry.Delete(v); err != nil {
+		if err := host.Delete(v); err != nil {
 			log.Println(err)
 			removeListOfFail = append(removeListOfFail, v)
 		}
@@ -98,24 +96,22 @@ func RegistriesRemove(c *gin.Context) {
 	return
 }
 
-func RegistryUpdate(c *gin.Context) {
+func HostUpdate(c *gin.Context) {
 	appG := app.Gin{C: c}
 	//ctx := context.Background()
 
 	bodyJson := make(map[string]interface{})
 	c.BindJSON(&bodyJson)
-	registry := models.Registry{
-		Model:    models.Model{},
-		Name:     bodyJson["Name"].(string),
-		URL:      bodyJson["URL"].(string),
-		NeedAuth: bodyJson["NeedAuth"].(bool),
-		Username: bodyJson["Username"].(string),
-		Password: bodyJson["Password"].(string),
-		Comment:  "",
+	host := models.Host{
+		Model: models.Model{},
+		Name: bodyJson["Name"].(string),
+		ViaSocket: bodyJson["ViaSocket"].(bool),
+		DockerEngineURL: bodyJson["DockerEngineURL"].(string),
+		HostIP: bodyJson["HostIP"].(string),
+		TLS: bodyJson["TLS"].(bool),
 	}
-	fmt.Println(bodyJson["Id"])
 
-	if err := registry.Update(bodyJson["Id"]); err != nil {
+	if err := host.Update(bodyJson["Id"]); err != nil {
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,

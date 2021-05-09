@@ -7,7 +7,7 @@
       <div slot="title">
         <a-popconfirm
           placement="top"
-          title="确定删除选中的仓库?"
+          title="确定删除选中的主机?"
           ok-text="是"
           cancel-text="我再想想"
           @confirm="batchRemove"
@@ -43,7 +43,7 @@
         </a-input>
       </div>
 
-      <!-- 仓库列表 -->
+      <!-- 主机列表 -->
       <a-table
         rowKey="Id"
         :pagination="false"
@@ -51,23 +51,15 @@
         :data-source="listData"
         :row-selection="rowSelection"
       >
-        <a-tag
-          color="cyan"
-          slot="issystem"
-          slot-scope="text, record"
-          v-if="record.Name === 'DockerHub'"
-        >
-          官方
-        </a-tag>
         <span slot="action" slot-scope="text, record">
           <template>
             <a-button
               type="primary"
-              :icon="record.Name === 'DockerHub' ? 'key' : 'edit'"
+              icon="edit"
               @click="showDrawer(record)"
               style="margin-left: 10px"
             >
-              {{ record.Name === 'DockerHub' ? '认证' : '修改' }}
+              修改
             </a-button>
           </template>
         </span>
@@ -84,21 +76,32 @@
       :maskClosable="true"
       @close="drawerOnClose"
     >
+      <a-alert
+        message="重要提示"
+        description="您可以通过Socket或TCP连接到指定环境Docker。
+          你可以在Docker文档中找到更多关于如何通过TCP公开Docker API的信息。
+          使用socket时请确保Docker启动flag包含如下
+           -v /var/run/docker.sock:/var/run/docker.sock (在Linux中) 或
+           -v \.\pipe\docker_engine:\.\pipe\docker_engine (在Windows中)."
+        type="info"
+        close-text="关闭"
+        style="margin-bottom: 15px"
+      />
       <a-form :label-col="{ span: 5 }" :wrapper-col="{ span: 19 }" >
         <a-form-item label="名称">
-          <a-input name="Name" v-model="formData.Name" placeholder="例如 myRegistry" :disabled="formData.Name === 'DockerHub' ? true : false" required/>
+          <a-input name="Name" v-model="formData.Name" placeholder="例如 myHost" />
         </a-form-item>
-        <a-form-item label="地址">
-          <a-input name="URL" v-model="formData.URL" placeholder="例如 example.com:12345" :disabled="formData.Name === 'DockerHub' ? true : false" required/>
+        <a-form-item label="通过Socket">
+          <a-switch name="ViaSocket" v-model="formData.ViaSocket"/>
         </a-form-item>
-        <a-form-item label="启用认证">
-          <a-switch name="NeedAuth" v-model="formData.NeedAuth"/>
+        <a-form-item label="Endpoint URL">
+          <a-input name="DockerEngineURL" v-model="formData.DockerEngineURL" placeholder="例如 10.0.0.1:12345 或 example.com:12345" :disabled="formData.ViaSocket"/>
         </a-form-item>
-        <a-form-item label="用户名">
-          <a-input name="username" v-model="formData.Username" :disabled="formData.NeedAuth ? false : true"/>
+        <a-form-item label="外部IP">
+          <a-input name="HostIP" v-model="formData.HostIP" placeholder="例如  10.0.0.1 或 example.com" />
         </a-form-item>
-        <a-form-item label="密码">
-          <a-input name="password" type="password" v-model="formData.Password" :disabled="formData.NeedAuth ? false : true"/>
+        <a-form-item label="启用TLS连接">
+          <a-switch name="TLS" v-model="formData.TLS"/>
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
           <a-button type="primary" @click="drawerSubmit">
@@ -111,47 +114,40 @@
 </template>
 
 <script>
-import { RegistryList, RegistryCreate, RegistriesRemove, RegistryUpdate } from '@/api/registries'
+import { HostList, HostCreate, HostsRemove, HostUpdate } from '@/api/hosts'
 
 const columns = [
-  // {
-  //   title: 'Id',
-  //   dataIndex: 'Id',
-  //   scopedSlots: { customRender: 'Id' }
-  // },
   {
     title: '名称',
     dataIndex: 'Name'
   },
   {
+    title: '通过Socket连接',
+    dataIndex: 'ViaSocket',
+    customRender: (is) => is === false ? 'false' : 'true'
+  },
+  {
+    title: 'Docker Endpoint URL',
+    dataIndex: 'DockerEngineURL'
+  },
+  {
+    title: '外部IP',
+    dataIndex: 'HostIP'
+  },
+  {
+    title: '启用TLS连接',
+    dataIndex: 'TLS',
+    customRender: (is) => is === false ? 'false' : 'true'
+  },
+  {
     title: '',
-    // dataIndex: 'Name',
-    scopedSlots: { customRender: 'issystem' }
-  },
-  {
-    title: '地址',
-    dataIndex: 'URL'
-  },
-  {
-    title: '认证',
-    dataIndex: 'NeedAuth',
-    customRender: (is) => is === true ? '是' : '否'
-  },
-  {
-    title: '创建时间',
-    dataIndex: 'CreatedAt',
-    customRender: (datetime) => datetime.split('T')[0] + ' ' + datetime.split('T')[1].split('.')[0]
-  },
-  {
-    title: ' ',
     dataIndex: 'action',
-    width: '150px',
     scopedSlots: { customRender: 'action' }
   }
 ]
 
 export default {
-  name: 'Registries',
+  name: 'Hosts',
   components: {
 
   },
@@ -159,15 +155,15 @@ export default {
     this.columns = columns
     return {
       formLayout: 'horizontal',
-      // form: this.$form.createForm(this, { name: 'registrycreate' }),
+      // form: this.$form.createForm(this, { name: 'hostcreate' }),
       formData: {},
       listData: [],
-      registryListData: [],
+      hostListData: [],
       drawerVisible: false,
       selectedRowKeys: [],
       deleteLoading: false,
       filterKey: '',
-      drawerTitle: '创建仓库',
+      drawerTitle: '创建主机',
       drawerType: 'create'
     }
   },
@@ -180,7 +176,7 @@ export default {
   computed: {
     filterList: function () {
       var key = this.filterKey
-      var list = this.registryListData
+      var list = this.hostListData
       return list.filter(function (item) {
         return item.Name.toLowerCase().indexOf(key.toLowerCase()) !== -1
       })
@@ -191,7 +187,7 @@ export default {
         onChange: this.onSelectChange,
         getCheckboxProps: record => ({
           props: {
-            disabled: record.Name === 'DockerHub'
+            disabled: record.Name === 'local'
           }
         })
       }
@@ -203,23 +199,33 @@ export default {
   watch: {
   },
   methods: {
+    formDataInit () {
+      this.formData = {
+        Id: 0,
+        Name: '',
+        ViaSocket: false,
+        DockerEngineURL: '',
+        HostIP: '',
+        TLS: false
+      }
+    },
     // 列表更新
     freshList () {
-      RegistryList()
+      HostList()
         .then((res) => {
-          this.registryListData = res.data
-          this.listData = this.registryListData
+          this.hostListData = res.data
+          this.listData = this.hostListData
           this.filterKey = ''
         })
         .catch((err) => {
-          this.$message.error(`更新仓库列表失败: ${err.message}`)
+          this.$message.error(`更新主机列表失败: ${err.message}`)
         })
     },
 
     filterChange () {
       var key = this.filterKey.trim()
       if (key.length === 0) {
-        this.listData = this.registryListData
+        this.listData = this.hostListData
       } else {
         this.listData = this.filterList
       }
@@ -227,51 +233,45 @@ export default {
 
     // 多选操作
     onSelectChange (selectedRowKeys) {
-      // // console.log('selectedRowKeys changed: ', selectedRowKeys)
+      // console.log('selectedRowKeys changed: ', selectedRowKeys)
       this.selectedRowKeys = selectedRowKeys
     },
     // 多选删除
     batchRemove () {
       this.deleteLoading = true
-      RegistriesRemove({ 'array': this.selectedRowKeys })
+      HostsRemove({ 'array': this.selectedRowKeys })
         .then((res) => {
           // console.log(res.data)
           if (res.data !== null) {
-            this.$message.warning(`成功删除 ${res.data.length} 个仓库，删除失败的仓库有: ${res.data}`)
+            this.$message.warning(`成功删除 ${res.data.length} 个主机，删除失败的主机有: ${res.data}`)
           } else {
-            this.$message.success(`成功删除 ${this.selectedRowKeys.length} 个仓库`)
+            this.$message.success(`成功删除 ${this.selectedRowKeys.length} 个主机`)
           }
           this.selectedRowKeys.splice(0, this.selectedRowKeys.length)
           this.deleteLoading = false
           this.freshList()
         })
         .catch((err) => {
-          this.$message.error(`仓库删除错误: ${err.message}`)
+          this.$message.error(`主机删除错误: ${err.message}`)
           this.selectedRowKeys.splice(0, this.selectedRowKeys.length)
           this.deleteLoading = false
           this.freshList()
         })
     },
 
-    // 镜像详情跳转
-    handleToInformation (id) {
-      this.$router.push({ path: `/registry/information?name=${id}` })
-    },
-
-    // 抽屉 - 搜索/添加 镜像
+    // 抽屉 - 创建/修改
     showDrawer (e) {
       console.log(e)
       if (typeof (e) !== 'undefined') {
         this.drawerType = 'update'
-        this.drawerTitle = e.Name === 'DockerHub' ? 'DockerHub认证' : '修改仓库信息'
+        this.drawerTitle = '修改主机信息'
         this.formData = {
-        Id: e.Id,
-        Name: e.Name,
-        URL: e.URL,
-        NeedAuth: e.NeedAuth,
-        Username: e.Username,
-        Password: e.Password,
-        Comment: ''
+          Id: e.Id,
+          Name: e.Name,
+          ViaSocket: e.ViaSocket,
+          DockerEngineURL: e.DockerEngineURL,
+          HostIP: e.HostIP,
+          TLS: e.TLS
       }
       }
       this.drawerVisible = true
@@ -280,7 +280,7 @@ export default {
     drawerOnClose () {
       this.drawerVisible = false
       this.drawerType = 'create'
-      this.drawerTitle = '创建仓库'
+      this.drawerTitle = '创建主机'
       this.formDataInit()
     },
 
@@ -291,57 +291,41 @@ export default {
     drawerSubmit (e) {
       e.preventDefault()
       // console.log(this.formData)
-      if (this.drawerType === 'create' && this.formData.Name === 'DockerHub') {
-        this.$message.error('DockerHub是保留值,请输入其他名称')
-      } else if (this.formData.Name.trim().length === 0 || this.formData.URL.trim().length === 0) {
-        this.$message.warning('名称和地址字段不能为空, 且不能包含空格, 请重新输入')
-      } else if (this.formData.NeedAuth === true &&
-        (this.formData.Username.split(' ').length !== 1 ||
-          this.formData.Username.trim().length === 0 ||
-            this.formData.Passsword === '')) {
-        this.$message.warning('启用认证时，用户名和地址字段不能为空, 且不能包含空格, 请重新输入')
+      if (this.formData.Name.trim().length === 0) {
+        this.$message.warning('名称不能为空, 且不能包含空格, 请重新输入')
+      } else if (this.formData.ViaSocket === false &&
+        (this.formData.DockerEngineURL.trim().length === 0)) {
+        this.$message.warning('启用Socket连接时，Docker Endpoint URL不能为空, 请重新输入')
       } else if (this.drawerType === 'create') {
-        RegistryCreate(this.formData)
+        HostCreate(this.formData)
           .then((res) => {
-            this.$message.success('创建仓库成功')
+            this.$message.success('创建主机成功')
             // console.log(res)
             this.freshList()
             this.drawerVisible = false
             this.formDataInit()
           })
           .catch((err) => {
-            this.$message.error(`创建仓库列表失败: ${err.message}`)
+            this.$message.error(`创建主机列表失败: ${err.message}`)
             this.freshList()
             this.drawerVisible = false
             this.formDataInit()
           })
       } else {
-        RegistryUpdate(this.formData)
+        HostUpdate(this.formData)
           .then((res) => {
-            this.$message.success('更新仓库成功')
+            this.$message.success('更新主机成功')
             // console.log(res)
             this.freshList()
             this.drawerVisible = false
             this.formDataInit()
           })
           .catch((err) => {
-            this.$message.error(`更新仓库失败: ${err.message}`)
+            this.$message.error(`更新主机失败: ${err.message}`)
             this.freshList()
             this.drawerVisible = false
             this.formDataInit()
           })
-      }
-    },
-
-    formDataInit () {
-      this.formData = {
-        Id: 0,
-        Name: '',
-        URL: '',
-        NeedAuth: false,
-        Username: '',
-        Password: '',
-        Comment: ''
       }
     }
   }

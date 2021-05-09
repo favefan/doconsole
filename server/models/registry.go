@@ -4,12 +4,12 @@ import "log"
 
 type Registry struct {
 	Model
-	Name string `gorm:"not null"`
-	URL string `gorm:"default:'#';not null"`
-	NeedAuth bool `gorm:"default:false;not null"`
-	Username string
-	Password string
-	Comment string
+	Name string `gorm:"unique;not null";form:"Name"`
+	URL string `gorm:"default:'#';not null";form:"URL"`
+	NeedAuth bool `gorm:"default:false;not null";form:"NeedAuth"`
+	Username string `form:"Username"`
+	Password string	`form:"Password"`
+	Comment string `form:"Comment"`
 }
 
 func (registry *Registry) Create() error {
@@ -37,8 +37,8 @@ func (*Registry) Get(id int) (interface{}, error) {
 	return registry, nil
 }
 
-func (registry *Registry) Update(id int) error {
-	if err := db.Model(Registry{}).Where("id = ?", id).Updates(registry).Error;
+func (registry *Registry) Update(id interface{}) error {
+	if err := db.Model(&Registry{}).Where("id = ?", id).Updates(registry).Error;
 		err != nil {
 		log.Println(err)
 		return err

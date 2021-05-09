@@ -262,7 +262,7 @@ const columns = [
 ]
 
 export default {
-  name: 'Images',
+  name: 'Networks',
   components: {
     STable,
     Ellipsis

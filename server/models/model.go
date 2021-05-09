@@ -19,7 +19,7 @@ var (
 
 // Model is the default model strcut.
 type Model struct {
-	Id        uint           `gorm:"primaryKey"`
+	Id        uint           `gorm:"primaryKey";form:"Id"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	//DeletedAt gorm.DeletedAt `gorm:"index"`
@@ -64,6 +64,10 @@ func Setup() {
 
 	// Auto Migrate
 	db.AutoMigrate(&Registry{})
+	db.AutoMigrate(&Host{})
+	db.Exec("INSERT INTO `doconsole`.`doconsole_registry` (`created_at`, `updated_at`, `name`) VALUES (?, ?, 'DockerHub')", time.Now(), time.Now())
+	db.Exec("INSERT INTO `doconsole`.`doconsole_host` (`created_at`, `updated_at`, `name`, `via_socket`) VALUES (?, ?, 'local', '1')", time.Now(), time.Now())
+
 }
 
 // CloseDB will not close DB.

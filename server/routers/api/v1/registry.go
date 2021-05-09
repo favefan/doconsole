@@ -2,6 +2,7 @@ package v1
 
 import (
 	_ "context"
+	"fmt"
 	"gitee.com/favefan/doconsole/models"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
@@ -95,4 +96,39 @@ func RegistriesRemove(c *gin.Context) {
 
 	appG.Response(http.StatusOK, e.Success, removeListOfFail)
 	return
+}
+
+func RegistryUpdate(c *gin.Context) {
+	appG := app.Gin{C: c}
+	//ctx := context.Background()
+
+	bodyJson := make(map[string]interface{})
+	c.BindJSON(&bodyJson)
+	registry := models.Registry{
+		Model:    models.Model{},
+		Name:     bodyJson["Name"].(string),
+		URL:      bodyJson["URL"].(string),
+		NeedAuth: bodyJson["NeedAuth"].(bool),
+		Username: bodyJson["Username"].(string),
+		Password: bodyJson["Password"].(string),
+		Comment:  "",
+	}
+	fmt.Println(bodyJson["Id"])
+
+	if err := registry.Update(bodyJson["Id"]); err != nil {
+		appG.Response(
+			http.StatusInternalServerError,
+			e.Error,
+			nil,
+		)
+		return
+	}
+
+	appG.Response(
+		http.StatusOK,
+		e.Success,
+		nil,
+	)
+	return
+
 }
