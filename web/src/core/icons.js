@@ -15,7 +15,7 @@ import images from '@/assets/icons/images.svg?inline'
 import network from '@/assets/icons/networks.svg?inline'
 import volume from '@/assets/icons/volumes.svg?inline'
 import dashboard from '@/assets/icons/dashboard.svg?inline'
-import repository from '@/assets/icons/repository.svg?inline'
+import registry from '@/assets/icons/registry.svg?inline'
 import host from '@/assets/icons/host.svg?inline'
 
-export { bxAnaalyse, container, containers, runnningContainer, image, network, volume, dashboard, images, repository, host }
+export { bxAnaalyse, container, containers, runnningContainer, image, network, volume, dashboard, images, registry, host }

@@ -1,6 +1,6 @@
 // eslint-disable-next-line
 import { UserLayout, BasicLayout } from '@/layouts'
-import { containers, images, dashboard, network } from '@/core/icons' // repository, volume, network, host
+import { containers, images, dashboard, network, volume, registry } from '@/core/icons' // repository, volume, network, host
 
 const RouteView = {
   name: 'RouteView',
@@ -118,7 +118,7 @@ export const asyncRouterMap = [
         name: 'volume',
         redirect: '/volume/volumes',
         component: RouteView,
-        meta: { title: 'menu.volume', icon: network, keepAlive: true },
+        meta: { title: 'menu.volume', icon: volume, keepAlive: true },
         children: [
           {
             path: '/volume/volumes',
@@ -131,6 +131,29 @@ export const asyncRouterMap = [
             name: 'VolumeInformation',
             component: () => import('@/views/volume/Information'),
             meta: { title: 'menu.volume.information', keepAlive: false },
+            hidden: true
+          }
+        ]
+      },
+      // 仓库管理
+      {
+        path: '/registry',
+        name: 'registry',
+        redirect: '/registry/registries',
+        component: RouteView,
+        meta: { title: 'menu.registry', icon: registry, keepAlive: true },
+        children: [
+          {
+            path: '/registry/registries',
+            name: 'Registries',
+            component: () => import('@/views/registry/Registries'),
+            meta: { title: 'menu.registry.registries', keepAlive: true }
+          },
+          {
+            path: '/registry/information',
+            name: 'RegistryInformation',
+            component: () => import('@/views/registry/Information'),
+            meta: { title: 'menu.registry.information', keepAlive: false },
             hidden: true
           }
         ]

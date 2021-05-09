@@ -54,6 +54,16 @@ func InitRouter() *gin.Engine {
 		// volumes
 		{
 			apiV1.GET("/volumes/json", v1.VolumeList)
+			apiV1.GET("/volumes/json/:name", v1.VolumeInspect)
+			apiV1.POST("/volumes/create", v1.VolumeCreate)
+			apiV1.DELETE("/volumes", v1.VolumesRemove)
+		}
+		// registries
+		{
+			apiV1.POST("/registries/create", v1.RegistryCreate)
+			apiV1.GET("/registries/json", v1.RegistryList)
+			apiV1.GET("/registries/json/:id", v1.RegistryInspect)
+			apiV1.DELETE("/registries", v1.RegistriesRemove)
 		}
 	}
 

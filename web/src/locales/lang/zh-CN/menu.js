@@ -48,5 +48,8 @@ export default {
     'menu.network.information': '网络详情',
     'menu.volume': '卷管理',
     'menu.volume.volumes': '卷列表',
-    'menu.volume.information': '卷详情'
+    'menu.volume.information': '卷详情',
+    'menu.registry': '仓库管理',
+    'menu.registry.registries': '仓库列表',
+    'menu.registry.information': '仓库详情'
 }

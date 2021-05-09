@@ -7,7 +7,7 @@
       <div slot="title">
         <a-popconfirm
           placement="top"
-          title="确定删除选中的卷?"
+          title="确定删除选中的仓库?"
           ok-text="是"
           cancel-text="我再想想"
           @confirm="batchRemove"
@@ -43,9 +43,9 @@
         </a-input>
       </div>
 
-      <!-- 卷列表 -->
+      <!-- 仓库列表 -->
       <a-table
-        rowKey="Name"
+        rowKey="Id"
         :pagination="false"
         :columns="columns"
         :data-source="listData"
@@ -67,7 +67,7 @@
 
     <!-- 添加抽屉 -->
     <a-drawer
-      title="创建卷"
+      title="创建仓库"
       placement="right"
       :width="521"
       :visible="drawerVisible"
@@ -84,37 +84,29 @@
                 rules: [
                   {
                     required: true,
-                    message: '名称可能是必要的，填就对了'
+                    message: '名称是必须的'
                   }
                 ]
               }
             ]"
-            placeholder="例如 myVolume"
+            placeholder="例如 myRegistry"
           />
         </a-form-item>
-        <a-form-item label="Driver">
-          <a-select
+        <a-form-item label="地址">
+          <a-input
             v-decorator="[
-              'Driver',
+              'URL',
               {
-                initialValue: 'local',
                 rules: [
                   {
                     required: true,
-                    message: 'Driver是必需的'
+                    message: 'URL是必须的'
                   }
                 ]
-              },
+              }
             ]"
-            placeholder="请选择"
-          >
-            <a-select-option value="bridge">
-              bridge
-            </a-select-option>
-            <a-select-option value="etc">
-              etc
-            </a-select-option>
-          </a-select>
+            placeholder="例如 example.com:12345"
+          />
         </a-form-item>
         <a-form-item :wrapper-col="{ span: 12, offset: 5 }">
           <a-button type="primary" html-type="submit">
@@ -127,27 +119,36 @@
 </template>
 
 <script>
-import { VolumeList, VolumeCreate, VolumesRemove } from '@/api/volumes'
+import { RegistryList, RegistryCreate, RegistriesRemove } from '@/api/registries'
 
 const columns = [
   {
-    title: 'Name',
+    title: 'Id',
+    dataIndex: 'Id',
+    scopedSlots: { customRender: 'name' }
+  },
+  {
+    title: '名称',
     dataIndex: 'Name',
     scopedSlots: { customRender: 'name' }
   },
   {
-    title: 'CreatedAt',
+    title: '地址',
+    dataIndex: 'URL'
+  },
+  {
+    title: '认证',
+    dataIndex: 'NeedAuth',
+    customRender: (is) => is === true ? '是' : '否'
+  },
+  {
+    title: '创建时间',
     dataIndex: 'CreatedAt',
-    customRender: (datetime) => datetime.split('T')[0] + ' ' + datetime.split('T')[1].split('Z')[0]
+    customRender: (datetime) => datetime.split('T')[0] + ' ' + datetime.split('T')[1].split('.')[0]
   },
   {
-    title: 'Driver',
-    dataIndex: 'Driver'
-  },
-  {
-    title: 'Mountpoint',
-    dataIndex: 'Mountpoint'
-    // customRender: (text) => is === false ? 'false' : 'true'
+    title: '备注',
+    dataIndex: 'Comment'
   }
 ]
 
@@ -160,9 +161,9 @@ export default {
     this.columns = columns
     return {
       formLayout: 'horizontal',
-      form: this.$form.createForm(this, { name: 'volumecreate' }),
+      form: this.$form.createForm(this, { name: 'registrycreate' }),
       listData: [],
-      volumeListData: [],
+      registryListData: [],
       drawerVisible: false,
       selectedRowKeys: [],
       deleteLoading: false,
@@ -177,12 +178,13 @@ export default {
   computed: {
     filterList: function () {
       var key = this.filterKey
-      var list = this.volumeListData
+      var list = this.registryListData
       return list.filter(function (item) {
         return item.Name.toLowerCase().indexOf(key.toLowerCase()) !== -1
       })
     },
     rowSelection () {
+      console.log(this.selectedRowKeys)
       return {
         selectedRowKeys: this.selectedRowKeys,
         onChange: this.onSelectChange,
@@ -193,6 +195,7 @@ export default {
       }
     },
     hasSelected () {
+      console.log(this.selectedRowKeys)
       return this.selectedRowKeys.length > 0
     }
   },
@@ -200,21 +203,21 @@ export default {
   methods: {
     // 列表更新
     freshList () {
-      VolumeList()
+      RegistryList()
         .then((res) => {
-          this.volumeListData = res.data.Volumes
-          this.listData = this.volumeListData
+          this.registryListData = res.data
+          this.listData = this.registryListData
           this.filterKey = ''
         })
         .catch((err) => {
-          this.$message.error(`更新卷列表失败: ${err.message}`)
+          this.$message.error(`更新仓库列表失败: ${err.message}`)
         })
     },
 
     filterChange () {
       var key = this.filterKey.trim()
       if (key.length === 0) {
-        this.listData = this.volumeListData
+        this.listData = this.registryListData
       } else {
         this.listData = this.filterList
       }
@@ -229,20 +232,20 @@ export default {
     batchRemove () {
       console.log('selectedRowKeys selected: ', this.selectedRowKeys)
       this.deleteLoading = true
-      VolumesRemove({ 'array': this.selectedRowKeys })
+      RegistriesRemove({ 'array': this.selectedRowKeys })
         .then((res) => {
           console.log(res.data)
           if (res.data !== null) {
-            this.$message.warning(`成功删除 ${res.data.length} 个卷，删除失败的卷有: ${res.data}`)
+            this.$message.warning(`成功删除 ${res.data.length} 个仓库，删除失败的仓库有: ${res.data}`)
           } else {
-            this.$message.success(`成功删除 ${this.selectedRowKeys.length} 个卷`)
+            this.$message.success(`成功删除 ${this.selectedRowKeys.length} 个仓库`)
           }
           this.selectedRowKeys.splice(0, this.selectedRowKeys.length)
           this.deleteLoading = false
           this.freshList()
         })
         .catch((err) => {
-          this.$message.error(`卷删除错误: ${err.message}`)
+          this.$message.error(`仓库删除错误: ${err.message}`)
           this.selectedRowKeys.splice(0, this.selectedRowKeys.length)
           this.deleteLoading = false
           this.freshList()
@@ -251,7 +254,7 @@ export default {
 
     // 镜像详情跳转
     handleToInformation (id) {
-      this.$router.push({ path: `/volume/information?name=${id}` })
+      this.$router.push({ path: `/registry/information?name=${id}` })
     },
 
     // 抽屉 - 搜索/添加 镜像
@@ -267,15 +270,15 @@ export default {
       e.preventDefault()
       this.form.validateFields((err, values) => {
         if (!err) {
-          VolumeCreate(values)
+          RegistryCreate(values)
           .then((res) => {
-            this.$message.success('创建卷成功')
+            this.$message.success('创建仓库成功')
             console.log(res)
             this.freshList()
             this.drawerVisible = false
           })
           .catch((err) => {
-            this.$message.error(`创建s卷列表失败: ${err.message}`)
+            this.$message.error(`创建s仓库列表失败: ${err.message}`)
             this.drawerVisible = false
           })
         }

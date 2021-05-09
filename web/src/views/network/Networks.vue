@@ -386,7 +386,8 @@ export default {
             this.drawerVisible = false
           })
           .catch((err) => {
-            this.$message.error(`更新网络列表失败: ${err.message}`)
+            this.$message.error(`创建网络列表失败: ${err.message}`)
+            this.drawerVisible = false
           })
         }
       })

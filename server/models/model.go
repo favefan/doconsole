@@ -19,10 +19,10 @@ var (
 
 // Model is the default model strcut.
 type Model struct {
-	ID         int `gorm:"primary_key" json:"id"`
-	CreatedOn  int `json:"created_on"`
-	ModifiedOn int `json:"modified_on"`
-	DeletedOn  int `json:"deleted_on"`
+	Id        uint           `gorm:"primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	//DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
 func Setup() {
@@ -61,6 +61,9 @@ func Setup() {
 	}
 	sqlDB.SetMaxIdleConns(10)
 	sqlDB.SetMaxOpenConns(100)
+
+	// Auto Migrate
+	db.AutoMigrate(&Registry{})
 }
 
 // CloseDB will not close DB.
