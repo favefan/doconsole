@@ -1,6 +1,9 @@
 package models
 
-import "log"
+import (
+	"gitee.com/favefan/doconsole/global"
+	"log"
+)
 
 type Host struct {
 	Model
@@ -12,7 +15,7 @@ type Host struct {
 }
 
 func (host *Host) Create() error {
-	if err := db.Create(host).Error; err != nil {
+	if err := global.GDB.Create(host).Error; err != nil {
 		log.Println(err)
 		return err
 	}
@@ -22,14 +25,14 @@ func (host *Host) Create() error {
 func (*Host) Get(id int) (interface{}, error) {
 	if id == -1 {
 		var hosts []Host
-		if err := db.Find(&hosts).Error; err != nil {
+		if err := global.GDB.Find(&hosts).Error; err != nil {
 			log.Println(err)
 			return nil, err
 		}
 		return hosts, nil
 	}
 	var host Host
-	if err := db.First(&host, id).Error; err != nil {
+	if err := global.GDB.First(&host, id).Error; err != nil {
 		log.Println(err)
 		return nil, err
 	}
@@ -37,7 +40,7 @@ func (*Host) Get(id int) (interface{}, error) {
 }
 
 func (host *Host) Update(id interface{}) error {
-	if err := db.Model(&Host{}).Where("id = ?", id).Updates(host).Error;
+	if err := global.GDB.Model(&Host{}).Where("id = ?", id).Updates(host).Error;
 		err != nil {
 		log.Println(err)
 		return err
@@ -46,7 +49,7 @@ func (host *Host) Update(id interface{}) error {
 }
 
 func (*Host) Delete(id interface{}) error {
-	if err := db.Where("id = ?", id).Delete(Host{}).Error;
+	if err := global.GDB.Where("id = ?", id).Delete(Host{}).Error;
 		err != nil {
 		log.Println(err)
 		return err

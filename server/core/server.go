@@ -1,9 +1,9 @@
-package initialize
+package core
 
 import (
 	"context"
 	"fmt"
-	"gitee.com/favefan/doconsole/pkg/setting"
+	"gitee.com/favefan/doconsole/initialize"
 	"gitee.com/favefan/doconsole/routers"
 	"log"
 	"net/http"
@@ -16,10 +16,10 @@ func RunServer() {
 	router := routers.InitRouter()
 
 	s := &http.Server{
-		Addr:           fmt.Sprintf(":%d", setting.ServerSetting.HTTPPort),
+		Addr:           fmt.Sprintf(":%d", initialize.ServerSetting.HTTPPort),
 		Handler:        router,
-		ReadTimeout:    setting.ServerSetting.ReadTimeout,
-		WriteTimeout:   setting.ServerSetting.WriteTimeout,
+		ReadTimeout:    initialize.ServerSetting.ReadTimeout,
+		WriteTimeout:   initialize.ServerSetting.WriteTimeout,
 		MaxHeaderBytes: 1 << 20,
 	}
 

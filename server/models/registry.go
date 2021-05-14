@@ -1,6 +1,9 @@
 package models
 
-import "log"
+import (
+	"gitee.com/favefan/doconsole/global"
+	"log"
+)
 
 type Registry struct {
 	Model
@@ -13,7 +16,7 @@ type Registry struct {
 }
 
 func (registry *Registry) Create() error {
-	if err := db.Create(registry).Error; err != nil {
+	if err := global.GDB.Create(registry).Error; err != nil {
 		log.Println(err)
 		return err
 	}
@@ -23,14 +26,14 @@ func (registry *Registry) Create() error {
 func (*Registry) Get(id int) (interface{}, error) {
 	if id == -1 {
 		var registries []Registry
-		if err := db.Find(&registries).Error; err != nil {
+		if err := global.GDB.Find(&registries).Error; err != nil {
 			log.Println(err)
 			return nil, err
 		}
 		return registries, nil
 	}
 	var registry Registry
-	if err := db.First(&registry, id).Error; err != nil {
+	if err := global.GDB.First(&registry, id).Error; err != nil {
 		log.Println(err)
 		return nil, err
 	}
@@ -38,7 +41,7 @@ func (*Registry) Get(id int) (interface{}, error) {
 }
 
 func (registry *Registry) Update(id interface{}) error {
-	if err := db.Model(&Registry{}).Where("id = ?", id).Updates(registry).Error;
+	if err := global.GDB.Model(&Registry{}).Where("id = ?", id).Updates(registry).Error;
 		err != nil {
 		log.Println(err)
 		return err
@@ -47,7 +50,7 @@ func (registry *Registry) Update(id interface{}) error {
 }
 
 func (*Registry) Delete(id interface{}) error {
-	if err := db.Where("id = ?", id).Delete(Registry{}).Error;
+	if err := global.GDB.Where("id = ?", id).Delete(Registry{}).Error;
 		err != nil {
 		log.Println(err)
 		return err

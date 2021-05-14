@@ -1,14 +1,14 @@
 package routers
 
 import (
-	"gitee.com/favefan/doconsole/pkg/setting"
+	"gitee.com/favefan/doconsole/initialize"
 	v1 "gitee.com/favefan/doconsole/routers/api/v1"
 	"github.com/gin-gonic/gin"
 )
 
 // InitRouter init router, return *gin.Engine.
 func InitRouter() *gin.Engine {
-	gin.SetMode(setting.ServerSetting.RunMode)
+	gin.SetMode(initialize.ServerSetting.RunMode)
 
 	r := gin.New()
 	r.Use(gin.Logger())
@@ -26,6 +26,8 @@ func InitRouter() *gin.Engine {
 		// docker engine
 		{
 			apiV1.GET("/docker/endpoint", v1.DaemonHost)
+			apiV1.GET("/docker/version", v1.ClientVersion)
+			apiV1.PUT("/docker/client", v1.CreateClient)
 		}
 		// containers
 		{

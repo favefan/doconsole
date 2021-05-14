@@ -1,5 +1,5 @@
 // eslint-disable-next-line
-import { UserLayout, BasicLayout } from '@/layouts'
+import { UserLayout, BasicLayout, BootLayout } from '@/layouts'
 import { containers, images, dashboard, network, volume, registry, host } from '@/core/icons' // repository, volume, network, host
 
 const RouteView = {
@@ -446,6 +446,24 @@ export const asyncRouterMap = [
  * @type { *[] }
  */
 export const constantRouterMap = [
+  {
+    path: '/boot',
+    component: BootLayout,
+    redirect: '/boot/setup',
+    hidden: true,
+    children: [
+      {
+        path: 'setup',
+        name: 'setup',
+        component: () => import(/* webpackChunkName: "boot" */ '@/views/boot/Setup')
+      },
+      {
+        path: 'redirect',
+        name: 'redirect',
+        component: () => import(/* webpackChunkName: "boot" */ '@/views/boot/Redirect')
+      }
+    ]
+  },
   {
     path: '/user',
     component: UserLayout,

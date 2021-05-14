@@ -27,6 +27,7 @@ func HostCreate(c *gin.Context) {
 	}
 
 	if err := host.Create(); err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -50,6 +51,7 @@ func HostList(c *gin.Context) {
 	var host models.Host
 	list, err := host.Get(-1)
 	if err != nil {
+		log.Println(err)
 		appG.Response(http.StatusInternalServerError, e.Error, nil)
 		return
 	}
@@ -112,6 +114,7 @@ func HostUpdate(c *gin.Context) {
 	}
 
 	if err := host.Update(bodyJson["Id"]); err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,

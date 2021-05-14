@@ -3,11 +3,11 @@ package v1
 import (
 	"context"
 	"fmt"
+	"gitee.com/favefan/doconsole/global"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/client"
 	"github.com/gin-gonic/gin"
 	"io"
 	"log"
@@ -19,23 +19,12 @@ func ImageList(c *gin.Context) {
 	appG := app.Gin{C: c}
 	ctx := context.Background()
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-
-	defer cli.Close()
-
-	images, err := cli.ImageList(ctx, types.ImageListOptions{
+	images, err := global.GClient.ImageList(ctx, types.ImageListOptions{
 		All:     true,
 		Filters: filters.Args{},
 	})
 	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -53,19 +42,9 @@ func ImageInspect(c *gin.Context) {
 	ctx := context.Background()
 	imageID := c.Param("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	image, _, err := global.GClient.ImageInspectWithRaw(ctx, imageID)
 	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	image, _, err := cli.ImageInspectWithRaw(ctx, imageID)
-	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -83,19 +62,9 @@ func ImageHistory(c *gin.Context) {
 	ctx := context.Background()
 	imageID := c.Param("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	imageHistory, err := global.GClient.ImageHistory(ctx, imageID)
 	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	imageHistory, err := cli.ImageHistory(ctx, imageID)
-	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -113,22 +82,12 @@ func ImageRemove(c *gin.Context) {
 	ctx := context.Background()
 	imageID := c.Param("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	_, err = cli.ImageRemove(ctx, imageID, types.ImageRemoveOptions{
+	_, err := global.GClient.ImageRemove(ctx, imageID, types.ImageRemoveOptions{
 		Force:         false,
 		PruneChildren: false,
 	})
 	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -147,18 +106,7 @@ func ImageSearch(c *gin.Context) {
 	term := c.Query("term")
 	//limit := c.Query("limit")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	searchResult, err := cli.ImageSearch(ctx, term, types.ImageSearchOptions{
+	searchResult, err := global.GClient.ImageSearch(ctx, term, types.ImageSearchOptions{
 		RegistryAuth:  "",
 		PrivilegeFunc: nil,
 		Filters:       filters.Args{},
@@ -184,18 +132,7 @@ func ImageInspectFromRegistry(c *gin.Context) {
 	imageID := c.Param("id")
 	//limit := c.Query("limit")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	inspectResult, err := cli.DistributionInspect(ctx, imageID, "")
+	inspectResult, err := global.GClient.DistributionInspect(ctx, imageID, "")
 	if err != nil {
 		fmt.Println(err)
 		appG.Response(
@@ -215,18 +152,7 @@ func ImagePull(c *gin.Context) {
 	ctx := context.Background()
 	image := c.Query("ref")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	reader, err := cli.ImagePull(ctx, image, types.ImagePullOptions{
+	reader, err := global.GClient.ImagePull(ctx, image, types.ImagePullOptions{
 		All:           false,
 		RegistryAuth:  "",
 		PrivilegeFunc: nil,

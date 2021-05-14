@@ -1,19 +1,22 @@
 <template>
   <div :class="wrpCls">
-    <avatar-dropdown :menu="showMenu" :current-user="currentUser" :class="prefixCls" />
+    <!-- <avatar-dropdown :menu="showMenu" :current-user="currentUser" :class="prefixCls" /> -->
     <!-- <select-lang :class="prefixCls" /> -->
+    <host-selection></host-selection>
   </div>
 </template>
 
 <script>
-import AvatarDropdown from './AvatarDropdown'
-import SelectLang from '@/components/SelectLang'
+// import AvatarDropdown from './AvatarDropdown'
+import HostSelection from './HostSelection'
+// import SelectLang from '@/components/SelectLang'
 
 export default {
   name: 'RightContent',
   components: {
-    AvatarDropdown,
-    SelectLang
+    // AvatarDropdown,
+    // SelectLang
+    HostSelection
   },
   props: {
     prefixCls: {
@@ -35,8 +38,9 @@ export default {
   },
   data () {
     return {
-      showMenu: true,
-      currentUser: {}
+      // showMenu: true,
+      // currentUser: {}
+      // HostSelectionList: []
     }
   },
   computed: {
@@ -48,11 +52,11 @@ export default {
     }
   },
   mounted () {
-    setTimeout(() => {
-      this.currentUser = {
-        name: 'Admin'
-      }
-    }, 1500)
+    // setTimeout(() => {
+    //   this.currentUser = {
+    //     name: 'Admin'
+    //   }
+    // }, 1500)
   }
 }
 </script>

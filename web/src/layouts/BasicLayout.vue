@@ -25,7 +25,7 @@
     <template v-slot:headerContentRender>
       <div>
         <a-tooltip title="刷新页面">
-          <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="() => { $message.info('只是一个DEMO') }" />
+          <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="reloadFun()" />
         </a-tooltip>
       </div>
     </template>
@@ -42,7 +42,7 @@
     <template v-slot:footerRender>
       <global-footer />
     </template>
-    <router-view />
+    <router-view v-if="update"/>
   </pro-layout>
 </template>
 
@@ -56,7 +56,7 @@ import { CONTENT_WIDTH_TYPE, SIDEBAR_TYPE, TOGGLE_MOBILE_TYPE } from '@/store/mu
 import defaultSettings from '@/config/defaultSettings'
 import RightContent from '@/components/GlobalHeader/RightContent'
 import GlobalFooter from '@/components/GlobalFooter'
-import Ads from '@/components/Other/CarbonAds'
+// import Ads from '@/components/Other/CarbonAds'
 import LogoSvg from '../assets/logo.svg?inline'
 
 export default {
@@ -65,9 +65,10 @@ export default {
     // SettingDrawer,
     RightContent,
     GlobalFooter,
-    LogoSvg,
-    Ads
+    LogoSvg
+    // Ads
   },
+  inject: ['reload'], // 使用 inject 注入 reload 变量
   data () {
     return {
       // preview.pro.antdv.com only use.
@@ -99,7 +100,8 @@ export default {
       query: {},
 
       // 是否手机模式
-      isMobile: false
+      isMobile: false,
+      update: true
     }
   },
   computed: {
@@ -139,6 +141,16 @@ export default {
       updateTheme(this.settings.primaryColor)
     }
   },
+  watch: {
+    '$store.state.contentUpdate': function () {
+      this.update = false
+      // 在组件移除后，重新渲染组件
+      // this.$nextTick可实现在DOM 状态更新后，执行传入的方法。
+      this.$nextTick(() => {
+          this.update = true
+      })
+    }
+  },
   methods: {
     i18nRender,
     handleMediaQuery (val) {
@@ -173,6 +185,10 @@ export default {
           }
           break
       }
+    },
+    reloadFun () {
+      this.reload() // 直接使用
+      // this.$router.push('/boot/redirect')
     }
   }
 }

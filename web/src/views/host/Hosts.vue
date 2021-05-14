@@ -187,7 +187,7 @@ export default {
         onChange: this.onSelectChange,
         getCheckboxProps: record => ({
           props: {
-            disabled: record.Name === 'local'
+            disabled: record.Name === this.$store.state.currentHost
           }
         })
       }
@@ -206,7 +206,8 @@ export default {
         ViaSocket: false,
         DockerEngineURL: '',
         HostIP: '',
-        TLS: false
+        TLS: false,
+        Default: false
       }
     },
     // 列表更新
@@ -214,6 +215,7 @@ export default {
       HostList()
         .then((res) => {
           this.hostListData = res.data
+          this.$store.commit('updateHostList', res.data)
           this.listData = this.hostListData
           this.filterKey = ''
         })
@@ -271,7 +273,8 @@ export default {
           ViaSocket: e.ViaSocket,
           DockerEngineURL: e.DockerEngineURL,
           HostIP: e.HostIP,
-          TLS: e.TLS
+          TLS: e.TLS,
+          Default: false
       }
       }
       this.drawerVisible = true

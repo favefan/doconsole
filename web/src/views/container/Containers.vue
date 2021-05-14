@@ -1,17 +1,30 @@
 <template>
   <page-header-wrapper>
-    <a-card style="margin-top: 24px" :bordered="false" title="容器列表">
+    <a-card style="margin-top: 24px" :bordered="false" :title="containerCount + '个容器'">
       <div slot="extra">
         <a-radio-group v-model="status">
           <a-radio-button value="all">全部</a-radio-button>
           <a-radio-button value="processing">正在运行</a-radio-button>
           <a-radio-button value="waiting">未运行</a-radio-button>
         </a-radio-group>
-        <a-input-search style="margin-left: 16px; width: 272px" />
-      </div>
-
-      <div class="operate">
-        <a-button type="dashed" style="width: 100%" icon="plus" @click="add">创建新容器</a-button>
+        <a-input
+          style="width: 280px; margin-left: 10px"
+          type="text"
+          allowClear
+          placeholder="列表过滤"
+          v-model="filterKey"
+          @change="filterChange"
+        >
+          <a-icon type="filter" style="color: rgba(0, 0, 0, 0.45)" />
+        </a-input>
+        <a-button
+          type="primary"
+          icon="plus"
+          style="margin-left: 10px"
+          @click="showDrawer()"
+        >
+          新建
+        </a-button>
       </div>
 
       <a-list size="large">
@@ -24,8 +37,8 @@
               shape="square"
               :src="item.State === 'running' ? containerRunningIcon : containerStoppedIcon"
             />
-            <a slot="title" style="font-size: 110%" @click="handleToInformation(item.Id)">{{ item.Names[0] }}</a>
-            <a slot="title" style="color: blue; font-size: 80%">&nbsp;&nbsp;{{ item.Image }}</a>
+            <a slot="title" style="font-size: 110%" @click="handleToContainerInformation(item.Id)">{{ item.Names[0] }}</a>
+            <a slot="title" style="color: blue; font-size: 80%" @click="handleToDockerInformation(item.ImageID)">&nbsp;&nbsp;{{ item.Image }}</a>
           </a-list-item-meta>
           <div slot="actions" class="action-button-list">
             <a-button
@@ -70,7 +83,7 @@
               <a-button type="circle" size="large" icon="more"></a-button>
             </a-dropdown>
           </div>
-          <div class="list-content">
+          <!-- <div class="list-content">
             <div class="list-content-item">
               <span>Owner</span>
               <p>1</p>
@@ -80,9 +93,9 @@
               <p>2</p>
             </div>
             <div class="list-content-item">
-              3<!-- <a-progress :percent="item.progress.value" :status="!item.progress.status ? null : item.progress.status" style="width: 180px" /> -->
+              3<a-progress :percent="item.progress.value" :status="!item.progress.status ? null : item.progress.status" style="width: 180px" />
             </div>
-          </div>
+          </div> -->
         </a-list-item>
       </a-list>
     </a-card>
@@ -93,8 +106,6 @@
 import ContainerStoppedIcon from '../../assets/icons/container-stopped-icon.png'
 import ContainerRunningIcon from '../../assets/icons/container-running-icon.png'
 // 演示如何使用 this.$dialog 封装 modal 组件
-import TaskForm from './modules/TaskForm'
-import Info from './components/Info'
 
 import {
   ContainerList,
@@ -107,15 +118,14 @@ import {
 export default {
   name: 'StandardList',
   components: {
-    TaskForm,
-    Info
   },
   data () {
     return {
       data: [],
       status: 'all',
       containerStoppedIcon: ContainerStoppedIcon,
-      containerRunningIcon: ContainerRunningIcon
+      containerRunningIcon: ContainerRunningIcon,
+      containerCount: 0
     }
   },
   // filters: {
@@ -136,40 +146,17 @@ export default {
       ContainerList()
         .then((res) => {
           this.data = res.data
+          this.containerCount = res.data.length
         })
         .catch((err) => {
           this.$message.error(`更新容器列表失败: ${err.message}`)
         })
     },
-    handleToInformation (id) {
+    handleToContainerInformation (id) {
       this.$router.push({ path: `/container/information?id=${id}` })
     },
-    add () {
-      this.$dialog(
-        TaskForm,
-        // component props
-        {
-          record: {},
-          on: {
-            ok () {
-              console.log('ok 回调')
-            },
-            cancel () {
-              console.log('cancel 回调')
-            },
-            close () {
-              console.log('modal close 回调')
-            }
-          }
-        },
-        // modal props
-        {
-          title: '新增',
-          width: 700,
-          centered: true,
-          maskClosable: false
-        }
-      )
+    handleToDockerInformation (id) {
+      this.$router.push({ path: `/image/information?id=${id}` })
     },
     start: function (id) {
       ContainerStart(id)

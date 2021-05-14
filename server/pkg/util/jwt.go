@@ -1,13 +1,13 @@
 package util
 
 import (
+	"gitee.com/favefan/doconsole/initialize"
 	"time"
 
-	"gitee.com/favefan/doconsole/pkg/setting"
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-var jwtSecret = []byte(setting.AppSetting.JwtSecret)
+var jwtSecret = []byte(initialize.AppSetting.JwtSecret)
 
 type Claims struct {
 	Username string `json:"username"`

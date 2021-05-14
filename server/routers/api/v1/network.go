@@ -2,11 +2,11 @@ package v1
 
 import (
 	"context"
+	"gitee.com/favefan/doconsole/global"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/network"
-	"github.com/docker/docker/client"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -16,20 +16,9 @@ func NetworkList(c *gin.Context) {
 	appG := app.Gin{C: c}
 	ctx := context.Background()
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	networks, err := global.GClient.NetworkList(ctx, types.NetworkListOptions{})
 	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-
-	defer cli.Close()
-
-	networks, err := cli.NetworkList(ctx, types.NetworkListOptions{})
-	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -47,19 +36,7 @@ func NetworkInspect(c *gin.Context) {
 	ctx := context.Background()
 	id := c.Param("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		log.Println(err)
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	networks, err := cli.NetworkInspect(ctx, id, types.NetworkInspectOptions{
+	networks, err := global.GClient.NetworkInspect(ctx, id, types.NetworkInspectOptions{
 		Scope:   "",
 		Verbose: true,
 	})
@@ -98,18 +75,8 @@ func NetworkCreate(c *gin.Context) {
 	internal := json["Internal"].(bool)
 	// label := c.PostForm(" Label")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-
 	// fmt.Println(containerService)
-	result, err := cli.NetworkCreate(ctx, json["Name"].(string), types.NetworkCreate{
+	result, err := global.GClient.NetworkCreate(ctx, json["Name"].(string), types.NetworkCreate{
 		CheckDuplicate: true,
 		Driver:         json["Driver"].(string),
 		Scope:          "local",
@@ -146,20 +113,8 @@ func NetworksRemove(c *gin.Context) {
 	c.BindJSON(&json)
 	// fmt.Println(json)
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-
-	defer cli.Close()
-
 	for _, v := range  json["array"] {
-		if err := cli.NetworkRemove(ctx, v); err != nil {
+		if err := global.GClient.NetworkRemove(ctx, v); err != nil {
 			log.Println(err)
 			removeListOfFail = append(removeListOfFail, v)
 		}

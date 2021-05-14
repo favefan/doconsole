@@ -1,4 +1,4 @@
-package setting
+package initialize
 
 import (
 	"log"
@@ -47,7 +47,7 @@ var DatabaseSetting = &Database{}
 var cfg *ini.File
 
 // Setup initialize the configuration instance
-func Setup() {
+func SettingSetup() {
 	var err error
 	cfg, err = ini.Load("configs/app.ini")
 	if err != nil {

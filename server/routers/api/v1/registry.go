@@ -29,6 +29,7 @@ func RegistryCreate(c *gin.Context) {
 	}
 
 	if err := registry.Create(); err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -52,6 +53,7 @@ func RegistryList(c *gin.Context) {
 	var registry models.Registry
 	list, err := registry.Get(-1)
 	if err != nil {
+		log.Println(err)
 		appG.Response(http.StatusInternalServerError, e.Error, nil)
 		return
 	}
@@ -116,6 +118,7 @@ func RegistryUpdate(c *gin.Context) {
 	fmt.Println(bodyJson["Id"])
 
 	if err := registry.Update(bodyJson["Id"]); err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,

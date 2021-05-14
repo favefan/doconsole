@@ -1,6 +1,7 @@
 package models
 
 import (
+	"gitee.com/favefan/doconsole/global"
 	"gorm.io/gorm"
 )
 
@@ -16,7 +17,7 @@ type User struct {
 // CheckAuth checks if authentication information exists
 func CheckAuth(username, password string) (bool, error) {
 	var user User
-	err := db.Select("id").Where(User{Username: username, Password: password}).First(&user).Error
+	err := global.GDB.Select("id").Where(User{Username: username, Password: password}).First(&user).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return false, err
 	}
@@ -31,7 +32,7 @@ func CheckAuth(username, password string) (bool, error) {
 // GetUserById return user details by given user id
 func GetUserById(id int) (*User, error) {
 	var user User
-	err := db.Where("id = ? AND deleted_on = ? ", id, 0).First(&user).Error
+	err := global.GDB.Where("id = ? AND deleted_on = ? ", id, 0).First(&user).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}
@@ -41,7 +42,7 @@ func GetUserById(id int) (*User, error) {
 
 func GetUserByUsername(username string) (*User, error) {
 	var user User
-	err := db.Where("username = ? AND deleted_on = ? ", username, 0).First(&user).Error
+	err := global.GDB.Where("username = ? AND deleted_on = ? ", username, 0).First(&user).Error
 	if err != nil && err != gorm.ErrRecordNotFound {
 		return nil, err
 	}

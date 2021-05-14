@@ -11,6 +11,8 @@ import permission from './modules/permission'
 // import permission from './modules/async-router'
 import getters from './getters'
 
+// import { HostList } from '@/api/hosts'
+
 Vue.use(Vuex)
 
 export default new Vuex.Store({
@@ -20,10 +22,24 @@ export default new Vuex.Store({
     permission
   },
   state: {
-
+    hostList: [],
+    currentHost: '',
+    contentUpdate: true
   },
   mutations: {
-
+    updateHostList (state, data) {
+      state.hostList = data
+    },
+    changeHost (state, host) {
+      state.currentHost = host
+    },
+    updateContent (state) {
+      if (state.contentUpdate === true) {
+        state.contentUpdate = false
+      } else {
+        state.contentUpdate = true
+      }
+    }
   },
   actions: {
 

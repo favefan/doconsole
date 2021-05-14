@@ -2,6 +2,7 @@ package v1
 
 import (
 	"context"
+	"gitee.com/favefan/doconsole/global"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
 	"gitee.com/favefan/doconsole/pkg/util"
@@ -9,7 +10,6 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/strslice"
-	"github.com/docker/docker/client"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -21,23 +21,13 @@ func ContainerList(c *gin.Context) {
 	appG := app.Gin{C: c}
 	ctx := context.Background()
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	containers, err := cli.ContainerList(ctx,
+	containers, err := global.GClient.ContainerList(ctx,
 		types.ContainerListOptions{
 			All:  true,
 			Size: true,
 		})
 	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -56,19 +46,9 @@ func ContainerInspect(c *gin.Context) {
 	ctx := context.Background()
 	containerID := c.Param("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	container, err := global.GClient.ContainerInspect(ctx, containerID)
 	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	container, err := cli.ContainerInspect(ctx, containerID)
-	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -86,19 +66,9 @@ func ContainerStart(c *gin.Context) {
 	ctx := context.Background()
 	containerID := c.Query("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	err := global.GClient.ContainerStart(ctx, containerID, types.ContainerStartOptions{})
 	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	err = cli.ContainerStart(ctx, containerID, types.ContainerStartOptions{})
-	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -116,19 +86,9 @@ func ContainerStop(c *gin.Context) {
 	ctx := context.Background()
 	containerID := c.Query("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	err := global.GClient.ContainerStop(ctx, containerID, nil)
 	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	err = cli.ContainerStop(ctx, containerID, nil)
-	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -146,19 +106,9 @@ func ContainerPause(c *gin.Context) {
 	ctx := context.Background()
 	containerID := c.Query("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	err := global.GClient.ContainerPause(ctx, containerID)
 	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	err = cli.ContainerPause(ctx, containerID)
-	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -176,19 +126,9 @@ func ContainerRestart(c *gin.Context) {
 	ctx := context.Background()
 	containerID := c.Query("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	err := global.GClient.ContainerRestart(ctx, containerID, nil)
 	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	err = cli.ContainerRestart(ctx, containerID, nil)
-	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -206,23 +146,13 @@ func ContainerRemove(c *gin.Context) {
 	ctx := context.Background()
 	containerID := c.Param("id")
 
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	if err != nil {
-		appG.Response(
-			http.StatusInternalServerError,
-			e.ErrorDockerDaemonConnectionFailed,
-			nil,
-		)
-		return
-	}
-	defer cli.Close()
-
-	err = cli.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{
+	err := global.GClient.ContainerRemove(ctx, containerID, types.ContainerRemoveOptions{
 		RemoveVolumes: false,
 		RemoveLinks:   false,
 		Force:         false,
 	})
 	if err != nil {
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
