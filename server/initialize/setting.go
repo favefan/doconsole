@@ -39,6 +39,8 @@ type Database struct {
 	Port string
 	Name string
 	TablePrefix string
+	MaxIdleConns int
+	MaxOpenConns int
 }
 var DatabaseSetting = &Database{}
 
