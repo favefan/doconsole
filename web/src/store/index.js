@@ -23,23 +23,28 @@ export default new Vuex.Store({
   },
   state: {
     hostList: [],
-    currentHost: '',
-    contentUpdate: true
+    currentHost: JSON.parse(localStorage.getItem('currentHost')) || '',
+    // isConnected: false,
+    // contentUpdate: true,
+    toRender: false
   },
   mutations: {
     updateHostList (state, data) {
       state.hostList = data
     },
-    changeHost (state, host) {
-      state.currentHost = host
+    // saveCurrentHost (state, host) {
+    //   state.currentHost = host
+    // },
+    isRenderContent (state, is) {
+      state.toRender = is
     },
-    updateContent (state) {
-      if (state.contentUpdate === true) {
-        state.contentUpdate = false
-      } else {
-        state.contentUpdate = true
-      }
+    saveCurrentHost (state, host) {
+      localStorage.setItem('currentHost', JSON.stringify(host))
+      state.currentHost = host
     }
+    // changingConnectionState (state, is) {
+    //   state.isConnected = is
+    // }
   },
   actions: {
 

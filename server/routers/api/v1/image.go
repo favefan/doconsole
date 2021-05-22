@@ -9,10 +9,8 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/gin-gonic/gin"
-	"io"
 	"log"
 	"net/http"
-	"os"
 )
 
 func ImageList(c *gin.Context) {
@@ -163,16 +161,12 @@ func ImagePull(c *gin.Context) {
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
-			nil,
+			"Image pulling failed.",
 		)
 		return
 	}
+	defer reader.Close()
 
-	_, err = io.Copy(os.Stdout, reader)
-	if err != nil && err != io.EOF {
-		log.Fatal(err)
-	}
-
-	appG.Response(http.StatusOK, e.Success, "inspectResult")
+	appG.Response(http.StatusOK, e.Success, "ok")
 	return
 }

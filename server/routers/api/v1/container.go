@@ -5,11 +5,8 @@ import (
 	"gitee.com/favefan/doconsole/global"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
-	"gitee.com/favefan/doconsole/pkg/util"
-	"gitee.com/favefan/doconsole/services/containerservice"
+	"gitee.com/favefan/doconsole/service"
 	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/strslice"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -40,7 +37,6 @@ func ContainerList(c *gin.Context) {
 	return
 }
 
-// ContainerInspect
 func ContainerInspect(c *gin.Context) {
 	appG := app.Gin{C: c}
 	ctx := context.Background()
@@ -165,75 +161,20 @@ func ContainerRemove(c *gin.Context) {
 	return
 }
 
-type ContainerCreateBody struct {
-	ContainerName string `form:"container_name"`
-	AutoPull      bool   `form:"auto_pull"`
+func ContainerCreate(c *gin.Context) {
+	appG := app.Gin{C: c}
+	// ctx := context.Background()
 
-	Config struct {
-		HostName   string            `form:"host_name"`
-		DomainName string            `form:"domain_name"`
-		Env        []string          `form:"env"`
-		Cmd        strslice.StrSlice `form:"cmd"`
-		Shell      strslice.StrSlice `form:"shell"`
-		Image      string            `form:"image" binding:"required"`
-	}
-
-	HostConfig struct {
-		NetworkMode   container.NetworkMode `form:"network_mode"`
-		RestartPolicy struct {
-			Name string `form:"restart"`
-			// MaximumRetryCount int
-		}
-		AutoRemove bool `form:"auto_remove"`
-
-		// Applicable to UNIX platforms
-		PublishAllPorts bool `form:"publish_all"`
-	}
-}
-
-// CreateContainer create a container with given parameters.
-func CreateContainer(c *gin.Context) {
-	var (
-		appG       = app.Gin{C: c}
-		createBody ContainerCreateBody
-	)
-
-	if err := c.ShouldBind(&createBody); err != nil {
-		appG.Response(http.StatusBadRequest, e.InvalidParams, nil)
-		return
-	}
-
-	containerService := new(containerservice.Container)
-	if err := util.StructAdaptiveCopyByJSON(&createBody, containerService); err != nil {
-		log.Fatalln(err)
-	}
-	// fmt.Println(containerService)
-	result, err := containerService.Create()
+	var body service.ContainerCreationBody
+	err := c.ShouldBindJSON(&body)
 	if err != nil {
 		log.Println(err)
-		appG.Response(http.StatusInternalServerError, e.Error, nil)
-		return
 	}
+
+	result, err := service.ContainerCreate(body)
+	if err != nil {
+		log.Println(err)
+	}
+
 	appG.Response(http.StatusOK, e.Success, result)
-	return
 }
-
-func InspectContainer() {}
-
-func ListContainerProcesses() {}
-
-func GetContainerLogs() {}
-
-func StopContainer() {}
-
-func RestartContainer() {}
-
-func KillContainer() {}
-
-func PauseContainer() {}
-
-func ResumeContainer() {}
-
-func RemoveContainer() {}
-
-func DeleteStoppedContainers() {}

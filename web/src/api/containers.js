@@ -6,6 +6,14 @@ const api = {
 
 export default api
 
+export function ContainerCreate (data) {
+  return request({
+    url: `${api.base}/create`,
+    method: 'post',
+    data: data
+  })
+}
+
 export function ContainerList () {
   return request({
     url: `${api.base}/json`,

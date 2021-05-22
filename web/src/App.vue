@@ -32,13 +32,13 @@ export default {
   },
   methods: {
     // provide中声明的变量
-    reload () {
-      // 通过 this.isRouterAlive 控制 router-view 达到刷新效果
-      this.isRouterAlive = false
-      this.$nextTick(function () {
-        this.isRouterAlive = true
-      })
-    }
+    // reload () {
+    //   // 通过 this.isRouterAlive 控制 router-view 达到刷新效果
+    //   this.isRouterAlive = false
+    //   this.$nextTick(function () {
+    //     this.isRouterAlive = true
+    //   })
+    // }
   }
 }
 </script>

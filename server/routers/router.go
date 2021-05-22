@@ -38,7 +38,7 @@ func InitRouter() *gin.Engine {
 			apiV1.GET("/containers/restart", v1.ContainerRestart)
 			apiV1.GET("/containers/pause", v1.ContainerPause)
 			apiV1.DELETE("/containers/:id", v1.ContainerRemove)
-			apiV1.POST("/containers/create", v1.CreateContainer)
+			apiV1.POST("/containers/create", v1.ContainerCreate)
 		}
 		// images
 		{

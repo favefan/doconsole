@@ -18,7 +18,7 @@ import themePluginConfig from '../config/themePluginConfig'
 import bootstrap from './core/bootstrap'
 import './core/lazy_use' // use lazy load components
 // import './permission' // permission control
-import './utils/filter' // global filter
+import './utils/filter' // global filter / 数字和日期的格式化处理
 import './global.less' // global style
 
 Vue.config.productionTip = false

@@ -48,11 +48,15 @@ export default {
             this.initDockerClient(res.data[0])
             this.$message.warning('无默认主机，已自动设置')
           }
+          // this.$store.commit('changingConnectionState', true)
         }
       })
       .catch((err) => {
         this.$message.error(`主机选择器: 加载主机列表失败 -> ${err.message}`)
+        this.$store.commit('isRenderContent', false)
       })
+  },
+  watch: {
   },
   methods: {
     initDockerClient (host) {
@@ -67,15 +71,16 @@ export default {
             this.IconColor = '#10D269'
             this.$message.success(`已连接到主机: ${res.data}`)
           }, 1000)
-          this.$store.commit('changeHost', res.data)
-          this.$store.commit('updateContent')
+          this.$store.commit('saveCurrentHost', res.data)
+          this.$store.commit('isRenderContent', true)
         })
         .catch((err) => {
           this.isSpin = false
           this.IconType = 'close-circle'
           this.IconColor = '#FF0000'
           this.$message.error(`连接主机失败: ${err.message}`)
-          this.$store.commit('changeHost', host.Name)
+          this.$store.commit('saveCurrentHost', host.Name)
+          this.$store.commit('isRenderContent', false)
         })
     },
     switchHost (e) {

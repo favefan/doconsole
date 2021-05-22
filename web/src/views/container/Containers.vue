@@ -21,7 +21,7 @@
           type="primary"
           icon="plus"
           style="margin-left: 10px"
-          @click="showDrawer()"
+          @click="toCreator()"
         >
           新建
         </a-button>
@@ -38,7 +38,7 @@
               :src="item.State === 'running' ? containerRunningIcon : containerStoppedIcon"
             />
             <a slot="title" style="font-size: 110%" @click="handleToContainerInformation(item.Id)">{{ item.Names[0] }}</a>
-            <a slot="title" style="color: blue; font-size: 80%" @click="handleToDockerInformation(item.ImageID)">&nbsp;&nbsp;{{ item.Image }}</a>
+            <a slot="title" style="color: blue; font-size: 80%" @click="handleToImageInformation(item.ImageID)">&nbsp;&nbsp;{{ item.Image }}</a>
           </a-list-item-meta>
           <div slot="actions" class="action-button-list">
             <a-button
@@ -125,7 +125,8 @@ export default {
       status: 'all',
       containerStoppedIcon: ContainerStoppedIcon,
       containerRunningIcon: ContainerRunningIcon,
-      containerCount: 0
+      containerCount: 0,
+      filterKey: ''
     }
   },
   // filters: {
@@ -152,10 +153,18 @@ export default {
           this.$message.error(`更新容器列表失败: ${err.message}`)
         })
     },
+    filterChange () {
+      // var key = this.filterKey.trim()
+      // if (key.length === 0) {
+      //   this.listData = this.networkListData
+      // } else {
+      //   this.listData = this.filterList
+      // }
+    },
     handleToContainerInformation (id) {
       this.$router.push({ path: `/container/information?id=${id}` })
     },
-    handleToDockerInformation (id) {
+    handleToImageInformation (id) {
       this.$router.push({ path: `/image/information?id=${id}` })
     },
     start: function (id) {
@@ -200,6 +209,9 @@ export default {
     },
     cancel (e) {
       console.log(e)
+    },
+    toCreator () {
+      this.$router.push({ path: `/container/creator` })
     }
   }
 }

@@ -20,7 +20,10 @@
         <a-switch name="ViaSocket" v-model="formData.ViaSocket"/>
       </a-form-item>
       <a-form-item label="Endpoint URL">
-        <a-input name="DockerEngineURL" v-model="formData.DockerEngineURL" placeholder="例如 10.0.0.1:12345 或 example.com:12345" :disabled="formData.ViaSocket"/>
+        <a-input name="DockerEngineURL"
+                 v-model="formData.DockerEngineURL"
+                 placeholder="例如 10.0.0.1:12345 或 example.com:12345"
+                 :disabled="formData.ViaSocket"/>
       </a-form-item>
       <a-form-item label="外部IP">
         <a-input name="HostIP" v-model="formData.HostIP" placeholder="例如 10.0.0.1 或 example.com" />
@@ -100,7 +103,7 @@ export default {
     },
     setupSuccess (res) {
       console.log(res)
-      this.$$store.commit('changeHost', res.data)
+      this.$store.commit('saveCurrentHost', res.data)
       this.$router.push({ path: '/' })
       // 延迟 1 秒显示欢迎信息
       setTimeout(() => {

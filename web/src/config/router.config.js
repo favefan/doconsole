@@ -63,6 +63,13 @@ export const asyncRouterMap = [
             component: () => import('@/views/container/Information'),
             meta: { title: 'menu.container.information', keepAlive: false },
             hidden: true
+          },
+          {
+            path: '/container/creator',
+            name: 'ContainersCreator',
+            component: () => import('@/views/container/Creator'),
+            meta: { title: 'menu.container.creator', keepAlive: false },
+            hidden: true
           }
         ]
       },
@@ -166,68 +173,7 @@ export const asyncRouterMap = [
             meta: { title: 'menu.host.hosts', keepAlive: true }
           }
         ]
-      },
-      // 仓库管理
-      // {
-      //   path: '/repository',
-      //   name: 'repository',
-      //   redirect: '/repository/repositories',
-      //   component: RouteView,
-      //   meta: { title: 'menu.repository', icon: repository, keepAlive: true },
-      //   children: [
-      //     {
-      //       path: '/repository/repositories',
-      //       name: 'Images',
-      //       component: () => import('@/views/repository/Repositories'),
-      //       meta: { title: 'menu.repository.repositories', keepAlive: true }
-      //     }
-      //   ]
-      // },
-      // {
-      //   path: '/repository',
-      //   name: 'repository',
-      //   redirect: '/repository/repositories',
-      //   component: RouteView,
-      //   meta: { title: 'menu.repository', icon: volume, keepAlive: true },
-      //   children: [
-      //     {
-      //       path: '/repository/repositories',
-      //       name: 'Images',
-      //       component: () => import('@/views/repository/Repositories'),
-      //       meta: { title: 'menu.repository.repositories', keepAlive: true }
-      //     }
-      //   ]
-      // },
-      // {
-      //   path: '/repository',
-      //   name: 'repository',
-      //   redirect: '/repository/repositories',
-      //   component: RouteView,
-      //   meta: { title: 'menu.repository', icon: network, keepAlive: true },
-      //   children: [
-      //     {
-      //       path: '/repository/repositories',
-      //       name: 'Images',
-      //       component: () => import('@/views/repository/Repositories'),
-      //       meta: { title: 'menu.repository.repositories', keepAlive: true }
-      //     }
-      //   ]
-      // },
-      // {
-      //   path: '/repository',
-      //   name: 'repository',
-      //   redirect: '/repository/repositories',
-      //   component: RouteView,
-      //   meta: { title: 'menu.repository', icon: host, keepAlive: true },
-      //   children: [
-      //     {
-      //       path: '/repository/repositories',
-      //       name: 'Images',
-      //       component: () => import('@/views/repository/Repositories'),
-      //       meta: { title: 'menu.repository.repositories', keepAlive: true }
-      //     }
-      //   ]
-      // },
+      }
       // profile
       // {
       //   path: '/profile',
@@ -304,71 +250,71 @@ export const asyncRouterMap = [
       // },
 
       // account
-      {
-        path: '/account',
-        component: RouteView,
-        redirect: '/account/center',
-        name: 'account',
-        meta: { title: 'menu.account', icon: 'setting', keepAlive: true, permission: ['user'] },
-        children: [
-          {
-            path: '/account/center',
-            name: 'center',
-            component: () => import('@/views/account/center'),
-            meta: { title: 'menu.account.center', keepAlive: true, permission: ['user'] }
-          },
-          {
-            path: '/account/settings',
-            name: 'settings',
-            component: () => import('@/views/account/settings/Index'),
-            meta: { title: 'menu.account.settings', hideHeader: true, permission: ['user'] },
-            redirect: '/account/settings/basic',
-            hideChildrenInMenu: true,
-            children: [
-              {
-                path: '/account/settings/basic',
-                name: 'BasicSettings',
-                component: () => import('@/views/account/settings/BasicSetting'),
-                meta: { title: 'account.settings.menuMap.basic', hidden: true, permission: ['user'] }
-              },
-              {
-                path: '/account/settings/security',
-                name: 'SecuritySettings',
-                component: () => import('@/views/account/settings/Security'),
-                meta: {
-                  title: 'account.settings.menuMap.security',
-                  hidden: true,
-                  keepAlive: true,
-                  permission: ['user']
-                }
-              },
-              {
-                path: '/account/settings/custom',
-                name: 'CustomSettings',
-                component: () => import('@/views/account/settings/Custom'),
-                meta: { title: 'account.settings.menuMap.custom', hidden: true, keepAlive: true, permission: ['user'] }
-              },
-              {
-                path: '/account/settings/binding',
-                name: 'BindingSettings',
-                component: () => import('@/views/account/settings/Binding'),
-                meta: { title: 'account.settings.menuMap.binding', hidden: true, keepAlive: true, permission: ['user'] }
-              },
-              {
-                path: '/account/settings/notification',
-                name: 'NotificationSettings',
-                component: () => import('@/views/account/settings/Notification'),
-                meta: {
-                  title: 'account.settings.menuMap.notification',
-                  hidden: true,
-                  keepAlive: true,
-                  permission: ['user']
-                }
-              }
-            ]
-          }
-        ]
-      }
+      // {
+      //   path: '/account',
+      //   component: RouteView,
+      //   redirect: '/account/center',
+      //   name: 'account',
+      //   meta: { title: 'menu.account', icon: 'setting', keepAlive: true, permission: ['user'] },
+      //   children: [
+      //     {
+      //       path: '/account/center',
+      //       name: 'center',
+      //       component: () => import('@/views/account/center'),
+      //       meta: { title: 'menu.account.center', keepAlive: true, permission: ['user'] }
+      //     },
+      //     {
+      //       path: '/account/settings',
+      //       name: 'settings',
+      //       component: () => import('@/views/account/settings/Index'),
+      //       meta: { title: 'menu.account.settings', hideHeader: true, permission: ['user'] },
+      //       redirect: '/account/settings/basic',
+      //       hideChildrenInMenu: true,
+      //       children: [
+      //         {
+      //           path: '/account/settings/basic',
+      //           name: 'BasicSettings',
+      //           component: () => import('@/views/account/settings/BasicSetting'),
+      //           meta: { title: 'account.settings.menuMap.basic', hidden: true, permission: ['user'] }
+      //         },
+      //         {
+      //           path: '/account/settings/security',
+      //           name: 'SecuritySettings',
+      //           component: () => import('@/views/account/settings/Security'),
+      //           meta: {
+      //             title: 'account.settings.menuMap.security',
+      //             hidden: true,
+      //             keepAlive: true,
+      //             permission: ['user']
+      //           }
+      //         },
+      //         {
+      //           path: '/account/settings/custom',
+      //           name: 'CustomSettings',
+      //           component: () => import('@/views/account/settings/Custom'),
+      //           meta: { title: 'account.settings.menuMap.custom', hidden: true, keepAlive: true, permission: ['user'] }
+      //         },
+      //         {
+      //           path: '/account/settings/binding',
+      //           name: 'BindingSettings',
+      //           component: () => import('@/views/account/settings/Binding'),
+      //           meta: { title: 'account.settings.menuMap.binding', hidden: true, keepAlive: true, permission: ['user'] }
+      //         },
+      //         {
+      //           path: '/account/settings/notification',
+      //           name: 'NotificationSettings',
+      //           component: () => import('@/views/account/settings/Notification'),
+      //           meta: {
+      //             title: 'account.settings.menuMap.notification',
+      //             hidden: true,
+      //             keepAlive: true,
+      //             permission: ['user']
+      //           }
+      //         }
+      //       ]
+      //     }
+      //   ]
+      // }
 
       // other
       /*

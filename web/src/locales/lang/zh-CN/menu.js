@@ -40,6 +40,7 @@ export default {
     'menu.container': '容器管理',
     'menu.container.containers': '容器列表',
     'menu.container.information': '容器详情',
+    'menu.container.creator': '创建容器',
     'menu.image': '镜像管理',
     'menu.image.images': '镜像列表',
     'menu.image.information': '镜像详情',

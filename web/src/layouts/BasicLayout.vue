@@ -25,7 +25,7 @@
     <template v-slot:headerContentRender>
       <div>
         <a-tooltip title="刷新页面">
-          <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="reloadFun()" />
+          <a-icon type="reload" style="font-size: 18px;cursor: pointer;" @click="reloadFun" />
         </a-tooltip>
       </div>
     </template>
@@ -39,10 +39,10 @@
       <right-content :top-menu="settings.layout === 'topmenu'" :is-mobile="isMobile" :theme="settings.theme" />
     </template>
     <!-- custom footer / 自定义Footer -->
-    <template v-slot:footerRender>
+    <!-- <template v-slot:footerRender>
       <global-footer />
-    </template>
-    <router-view v-if="update"/>
+    </template> -->
+    <router-view v-if="isRender"/>
   </pro-layout>
 </template>
 
@@ -101,7 +101,7 @@ export default {
 
       // 是否手机模式
       isMobile: false,
-      update: true
+      isRender: false
     }
   },
   computed: {
@@ -142,13 +142,8 @@ export default {
     }
   },
   watch: {
-    '$store.state.contentUpdate': function () {
-      this.update = false
-      // 在组件移除后，重新渲染组件
-      // this.$nextTick可实现在DOM 状态更新后，执行传入的方法。
-      this.$nextTick(() => {
-          this.update = true
-      })
+    '$store.state.toRender': function (val) {
+      this.isRender = val
     }
   },
   methods: {
@@ -186,9 +181,19 @@ export default {
           break
       }
     },
+    // reloadFun () {
+    //   this.reload() // 直接使用
+    //   // this.$router.push('/boot/redirect')
+    // },
     reloadFun () {
-      this.reload() // 直接使用
-      // this.$router.push('/boot/redirect')
+      if (this.$store.state.toRender === true) {
+        this.isRender = false
+        this.$nextTick(() => { // $nextTick 是在 DOM 更新循环结束之后执行延迟回调
+          this.isRender = true
+        })
+      } else {
+        this.$message.warning('请连接主机后再试')
+      }
     }
   }
 }

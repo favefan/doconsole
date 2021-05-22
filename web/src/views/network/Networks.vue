@@ -339,7 +339,7 @@ export default {
     },
     // 多选删除
     batchRemove () {
-      console.log('selectedRowKeys selected: ', this.selectedRowKeys)
+      // console.log('selectedRowKeys selected: ', this.selectedRowKeys)
       this.deleteLoading = true
       NetworksRemove({ 'array': this.selectedRowKeys })
         .then((res) => {

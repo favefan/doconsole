@@ -102,11 +102,11 @@ const vueConfig = {
 
   devServer: {
     // development server port 8000
-    port: 8888,
+    port: 80,
     // If you want to turn on the proxy, please remove the mockjs /src/main.jsL11
     proxy: {
       '/': {
-        target: 'http://localhost:8000'
+        target: 'http://localhost:8192'
         // ws: false,
         // changeOrigin: true
       }
@@ -115,7 +115,7 @@ const vueConfig = {
 
   // disable source map in production
   productionSourceMap: false,
-  lintOnSave: undefined,
+  lintOnSave: true,
   // babel-loader no-ignore node_modules/*
   transpileDependencies: []
 }

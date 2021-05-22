@@ -1,4 +1,4 @@
-package util
+package git
 
 import (
 	"crypto/tls"
@@ -13,13 +13,13 @@ import (
 	githttp "gopkg.in/src-d/go-git.v4/plumbing/transport/http"
 )
 
-// GitService represents a service for managing Git.
-type GitService struct {
+// Service represents a service for managing Git.
+type Service struct {
 	httpsCli *http.Client
 }
 
-// NewGitService initializes a new service.
-func NewGitService() *GitService {
+// NewService initializes a new service.
+func NewService() *Service {
 	httpsCli := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -29,20 +29,20 @@ func NewGitService() *GitService {
 
 	client.InstallProtocol("https", githttp.NewClient(httpsCli))
 
-	return &GitService{
+	return &Service{
 		httpsCli: httpsCli,
 	}
 }
 
 // ClonePublicRepository clones a public git repository using the specified URL in the specified
 // destination folder.
-func (service *GitService) ClonePublicRepository(repositoryURL, referenceName string, destination string) error {
+func (service *Service) ClonePublicRepository(repositoryURL, referenceName string, destination string) error {
 	return cloneRepository(repositoryURL, referenceName, destination)
 }
 
 // ClonePrivateRepositoryWithBasicAuth clones a private git repository using the specified URL in the specified
 // destination folder. It will use the specified username and password for basic HTTP authentication.
-func (service *GitService) ClonePrivateRepositoryWithBasicAuth(repositoryURL, referenceName string, destination, username, password string) error {
+func (service *Service) ClonePrivateRepositoryWithBasicAuth(repositoryURL, referenceName string, destination, username, password string) error {
 	credentials := username + ":" + url.PathEscape(password)
 	repositoryURL = strings.Replace(repositoryURL, "://", "://"+credentials+"@", 1)
 	return cloneRepository(repositoryURL, referenceName, destination)
