@@ -123,3 +123,41 @@ func NetworksRemove(c *gin.Context) {
 	appG.Response(http.StatusOK, e.Success, removeListOfFail)
 	return
 }
+
+func NetworkConnect(c *gin.Context) {
+	appG := app.Gin{C: c}
+	ctx := context.Background()
+
+	networkID := c.Param("id")
+	json := make(map[string]string)
+	c.BindJSON(&json)
+
+	err := global.GClient.NetworkConnect(ctx, networkID, json["Container"], nil)
+	if err != nil {
+		log.Println(err)
+		appG.Response(http.StatusInternalServerError, e.Error, err)
+		return
+	}
+
+	appG.Response(http.StatusOK, e.Success, "ok")
+	return
+}
+
+func NetworkDisconnect(c *gin.Context) {
+	appG := app.Gin{C: c}
+	ctx := context.Background()
+
+	networkID := c.Param("id")
+	json := make(map[string]string)
+	c.BindJSON(&json)
+
+	err := global.GClient.NetworkDisconnect(ctx, networkID, json["Container"], true)
+	if err != nil {
+		log.Println(err)
+		appG.Response(http.StatusInternalServerError, e.Error, err)
+		return
+	}
+
+	appG.Response(http.StatusOK, e.Success, "ok")
+	return
+}

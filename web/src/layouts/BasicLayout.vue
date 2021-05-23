@@ -68,7 +68,7 @@ export default {
     LogoSvg
     // Ads
   },
-  inject: ['reload'], // 使用 inject 注入 reload 变量
+  // inject: ['reload'], // 使用 inject 注入 reload 变量
   data () {
     return {
       // preview.pro.antdv.com only use.

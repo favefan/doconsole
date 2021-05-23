@@ -159,7 +159,7 @@
         <a-tab-pane key="3" tab="网络配置" force-render>
           <a-form>
             <a-form-item label="网络">
-              <a-select @change="networkChange" placeholder="请选择一个网络">
+              <a-select @change="networkChange" default-value="bridge" placeholder="请选择一个网络">
                 <a-select-option v-for="net in formValue.networkList" :key="net.Id" :value="net.Name">
                   {{ net.Name }}
                 </a-select-option>
@@ -201,7 +201,7 @@
           </span>
         </a-popover> -->
       </span>
-      <a-button type="primary" @click="submit" :loading="loading">部署</a-button>
+      <a-button type="primary" @click="submit" :loading="loading" :disabled="readyToSubmit">部署</a-button>
     </footer-tool-bar>
   </page-header-wrapper>
 </template>
@@ -240,10 +240,10 @@ export default {
       },
       formData: {
         Name: '',
-        Image: null, // image
+        Image: '', // image
         ExposedPorts: {}, //
         Env: [], // env
-        Cmd: [], // command
+        Cmd: '', // command
         Entrypoint: '',
         WorkingDir: '',
         User: '',
@@ -260,7 +260,7 @@ export default {
           RestartPolicy: {
             Name: 'no'
           },
-          NetworkMode: ''
+          NetworkMode: 'bridge'
         },
         Volumes: {}, // volumes
         NetworkingConfig: {
@@ -273,16 +273,12 @@ export default {
     this.initForm()
   },
   watch: {
-    // '$store.state.isConnected': function (val) {
-    //   if (val === true) {
-    //     console.log('init start.')
-    //     setTimeout(() => {
-    //         this.initForm()
-    //     }, 1000)
-    //   }
-    // }
   },
-  computed: {},
+  computed: {
+    readyToSubmit: function () {
+      return this.formData.Name === '' || this.formData.Image === ''
+    }
+  },
   methods: {
     initForm () {
         NetworkList()
@@ -304,8 +300,6 @@ export default {
         })
       ImageList()
         .then((res) => {
-          // Vue.set(this.formValue, 'imageList', res.data)
-          // this.formValue.imageList = [...res.data]
           this.formValue.imageList = res.data
           if (res.data.length !== 0) {
             this.noImages = true
@@ -318,6 +312,8 @@ export default {
     },
     // 提交动作
     submit () {
+      this.loading = true
+      this.prepareEntrypoint()
       this.praseCommands(this.formValue.commands)
       this.praseVolumeMaps(this.formValue.volumeMap)
       this.praseConsoleConfigs(this.formValue.consoles)
@@ -325,12 +321,21 @@ export default {
       this.praseNetworkConfigs()
       ContainerCreate(this.formData)
         .then((res) => {
-          console.log(res)
+          this.$message.success('容器创建成功')
+          this.loading = false
+          this.$router.push({ path: `/container/information?id=${res.data}` })
         })
         .catch((err) => {
-          console.log(err)
+          // console.log(err.response.data)
+          this.$message.success(`容器创建失败: ${err.response.data.data}`)
+          this.loading = false
         })
-      console.log(this.formData)
+      // console.log(this.formData)
+    },
+    prepareEntrypoint () {
+      if (this.formData.Entrypoint === '') {
+        this.formData.Entrypoint = null
+      }
     },
     // 表单数据整理
     praseNetworkConfigs () {

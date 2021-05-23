@@ -7,6 +7,7 @@ import (
 	"gitee.com/favefan/doconsole/pkg/e"
 	"gitee.com/favefan/doconsole/service"
 	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/container"
 	"github.com/gin-gonic/gin"
 	"log"
 	"net/http"
@@ -169,12 +170,37 @@ func ContainerCreate(c *gin.Context) {
 	err := c.ShouldBindJSON(&body)
 	if err != nil {
 		log.Println(err)
+		appG.Response(http.StatusBadRequest, e.InvalidParams, err)
+		return
 	}
 
 	result, err := service.ContainerCreate(body)
 	if err != nil {
-		log.Println(err)
+		appG.Response(http.StatusInternalServerError, e.Error, err)
+		return
 	}
 
 	appG.Response(http.StatusOK, e.Success, result)
+	return
+}
+
+func ContainerUpdate(c *gin.Context) {
+	appG := app.Gin{C: c}
+	ctx := context.Background()
+	containerID := c.Param("id")
+	json := make(map[string]string) //注意该结构接受的内容
+	c.BindJSON(&json)
+	_, err := global.GClient.ContainerUpdate(ctx, containerID, container.UpdateConfig{
+		RestartPolicy: container.RestartPolicy{
+			Name: json["RestartPolicy"],
+		},
+	})
+	if err != nil {
+		log.Println(err)
+		appG.Response(http.StatusInternalServerError, e.Error, err)
+		return
+	}
+
+	appG.Response(http.StatusOK, e.Success, "ok")
+	return
 }

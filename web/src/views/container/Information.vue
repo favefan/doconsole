@@ -9,109 +9,175 @@
 
     <template v-slot:content>
       <a-descriptions size="default" :column="1"> <!-- isMobile ? 1 : 2 -->
-        <a-descriptions-item label="Id">{{ data.Id }}</a-descriptions-item>
-        <a-descriptions-item label="创建时间">{{ data.Created }}</a-descriptions-item>
-        <a-descriptions-item label="启动时间">{{ data.State.StartedAt }}</a-descriptions-item>
-        <a-descriptions-item label="无">
-          <a href="">无</a>
+        <a-descriptions-item label="Id">{{ data.Id | shortString }}</a-descriptions-item>
+        <a-descriptions-item label="镜像">
+          <a @click="() => {$router.push({path: `/image/information?id=${data.Image}`})}">
+            {{ data.Config.Image }} @{{ (data.Image || '').split(':')[1] | shortString }}
+          </a>
         </a-descriptions-item>
+        <a-descriptions-item label="IP地址">{{ data.NetworkSettings.IPAddress || '无' }}</a-descriptions-item>
+        <a-descriptions-item label="创建时间">{{ data.Created | timeFormat }}</a-descriptions-item>
+        <a-descriptions-item label="启动时间">{{ data.State.StartedAt | timeFormat }}</a-descriptions-item>
+        <a-descriptions-item label="结束时间">{{ data.State.FinishedAt | timeFormat }}</a-descriptions-item>
       </a-descriptions>
     </template>
 
     <!-- OperationButtonGroup -->
     <template v-slot:extra>
-      <a-button
-        type="circle"
-        size="large"
-        icon="code"
-        title="CLI"
-        :disabled="data.State.Status === 'running' ? false : true"
-      ></a-button>
-      <a-button
-        type="circle"
-        size="large"
-        :icon="data.State.Status === 'running' ? 'poweroff' : 'caret-right'"
-        @click="data.State.Status === 'running' ? stop(item.Id) : start(item.Id)"
-        title="启动或停止"
-      ></a-button>
-      <a-button
-        type="circle"
-        size="large"
-        icon="reload"
-        @click="restart(data.Id)"
-        :disabled="data.State.Status === 'running' ? false : true"
-        title="重启"
-      ></a-button>
-      <a-popconfirm
-        placement="bottomLeft"
-        title="确定删除这个容器?"
-        ok-text="是"
-        cancel-text="我再想想"
-        @confirm="confirm(item.Id)"
-      > <!-- @cancel="cancel" -->
-        <a-button type="circle" size="large" icon="delete" title="删除"></a-button>
-      </a-popconfirm></template>
+      <operation-button-group :data="{ State: data.State.Status, Id: data.Id }" :call="initContainerDetail"></operation-button-group>
+    </template>
 
     <!-- Status under OperationButtonGroup -->
     <template v-slot:extraContent>
       <a-row class="status-list">
-        <a-col :xs="12" :sm="12">
+        <a-col>
           <div class="text">状态</div>
-          <div class="heading">{{ data.State.Status }}</div>
+          <div class="heading">{{ data.State | getstatetext }}
+            <span v-if="!data.State.Running && data.State.Status !== 'created'">, 退出代码 {{ data.State.ExitCode }}</span>
+          </div>
         </a-col>
-        <a-col :xs="12" :sm="12">
-          <div class="text">Pid</div>
-          <div class="heading">{{ data.State.Pid }}</div>
+        <a-col style="margin-top: 10px">
+          <div class="text">PID</div>
+          <div class="heading">{{ data.State.Pid }}
+          </div>
         </a-col>
       </a-row>
     </template>
 
-    <!-- tabList: [
-    { key: 'detail', tab: '详细' },
-    { key: 'logs', tab: '日志' },
-    { key: 'stats', tab: '资源' },
-    { key: 'cli', tab: '连接' },
-    { key: 'attach', tab: '跟踪' }
-    ], -->
-
     <div
       v-if="tabActiveKey === 'detail'"
     >
-      <a-card style="margin-top: 24px" :bordered="false" title="用户信息">
-        <a-descriptions>
-          <a-descriptions-item label="用户姓名">付晓晓</a-descriptions-item>
-          <a-descriptions-item label="会员卡号">32943898021309809423</a-descriptions-item>
-          <a-descriptions-item label="身份证">3321944288191034921</a-descriptions-item>
-          <a-descriptions-item label="联系方式">18112345678</a-descriptions-item>
-          <a-descriptions-item label="联系地址">浙江省杭州市西湖区黄姑山路工专路交叉路口</a-descriptions-item>
-        </a-descriptions>
-        <a-descriptions title="信息组">
-          <a-descriptions-item label="某某数据">725</a-descriptions-item>
-          <a-descriptions-item label="该数据更新时间">2018-08-08</a-descriptions-item>
-          <a-descriptions-item ></a-descriptions-item>
-          <a-descriptions-item label="某某数据">725</a-descriptions-item>
-          <a-descriptions-item label="该数据更新时间">2018-08-08</a-descriptions-item>
-          <a-descriptions-item ></a-descriptions-item>
-        </a-descriptions>
-        <a-card type="inner" title="多层信息组">
-          <a-descriptions title="组名称" size="small">
-            <a-descriptions-item label="负责人">林东东</a-descriptions-item>
-            <a-descriptions-item label="角色码">1234567</a-descriptions-item>
-            <a-descriptions-item label="所属部门">XX公司-YY部</a-descriptions-item>
-            <a-descriptions-item label="过期时间">2018-08-08</a-descriptions-item>
-            <a-descriptions-item label="描述">这段描述很长很长很长很长很长很长很长很长很长很长很长很长很长很长...</a-descriptions-item>
-          </a-descriptions>
-          <a-divider style="margin: 16px 0" />
-          <a-descriptions title="组名称" size="small" :col="1">
-            <a-descriptions-item label="学名">	Citrullus lanatus (Thunb.) Matsum. et Nakai一年生蔓生藤本；茎、枝粗壮，具明显的棱。卷须较粗..</a-descriptions-item>
-          </a-descriptions>
-          <a-divider style="margin: 16px 0" />
-          <a-descriptions title="组名称" size="small" :col="2">
-            <a-descriptions-item label="负责人">付小小</a-descriptions-item>
-            <a-descriptions-item label="角色码">1234567</a-descriptions-item>
-          </a-descriptions>
-        </a-card>
+      <a-card class="card-row" :bordered="false" title="容器信息">
+        <a-row>
+          <a-col :span="rowHeadSpan">
+            端口配置
+          </a-col>
+          <a-col :span="rowContentSpan">
+            <div v-for="portMapping in portBindings" :key="portMapping.host"> {{ portMapping.host }} <a-icon type="arrow-right" /> {{ portMapping.container }} </div>
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="rowHeadSpan">
+            CMD
+          </a-col>
+          <a-col :span="rowContentSpan">
+            <code>{{ data.Config.Cmd | command }}</code>
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="rowHeadSpan">
+            入口 (Entrypoint)
+          </a-col>
+          <a-col :span="rowContentSpan">
+            <code>{{ data.Config.Entrypoint | command }}</code>
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="rowHeadSpan">
+            环境变量 (Env)
+          </a-col>
+          <a-col :span="rowContentSpan">
+            <code v-for="env in data.Config.Env" :key="env">{{ env }} </code>
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="rowHeadSpan">
+            重启策略
+          </a-col>
+          <a-col :span="rowContentSpan">
+            <a-select v-model="restartPolicy" size="small" style="width: 80%" @change="restartPolicyChange">
+              <a-select-option value="no">
+                不重启 (no)
+              </a-select-option>
+              <a-select-option value="on-failure">
+                发生错误时 (on-failure)
+              </a-select-option>
+              <a-select-option value="always">
+                总是 (always)
+              </a-select-option>
+              <a-select-option value="unless-stopped">
+                手动停止后 (unless-stopped)
+              </a-select-option>
+            </a-select>
+            <a-button style="margin-left: 15px" size="small" type="primary" @click="updateRestartPolicy(data.Id)" :loading="updateRPLoading">更新</a-button>
+          </a-col>
+        </a-row>
+      </a-card>
 
+      <a-card style="margin-top: 24px" :bordered="false" title="卷信息">
+        <table class="volume-table table">
+          <thead>
+            <tr>
+              <th>Host/volume</th>
+              <th>Path in container</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="vol in data.Mounts" :key="vol.Name">
+              <td v-if="vol.Type === 'bind'">{{ vol.Source }}</td>
+              <td v-if="vol.Type === 'volume'"
+                ><a @click="() => {$router.push({path: `/volume/information?name=${vol.Name}`})}">{{ vol.Name }}</a></td
+              >
+              <td>{{ vol.Destination }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </a-card>
+
+      <a-card style="margin-top: 24px" :bordered="false" title="加入的网络">
+        <a-row style="margin-bottom: 10px">
+          <a-col :span="6" style="text-align: right; padding-right: 15px">
+            加入一个网络
+          </a-col>
+          <a-col :span="12">
+            <a-select size="small" style="width: 100%" placeholder="选择一个网络" @change="SelectNetwork">
+              <a-select-option v-for="net in networkList" :key="net.Id" :value="net.Id">
+                {{ net.Name }}
+              </a-select-option>
+            </a-select>
+          </a-col>
+          <a-col :span="6">
+            <a-button
+              style="margin-left: 15px"
+              size="small"
+              type="primary"
+              @click="joinNetwork(data.Id)"
+              :loading="joinNetworkLoading"
+              :disabled="selectedNetwork === ''"
+            >加入网络</a-button>
+          </a-col>
+        </a-row>
+        <a-row>
+          <table class="network-table table">
+            <thead>
+              <tr>
+                <th>网络</th>
+                <th>IP地址</th>
+                <th>网关</th>
+                <th>MAC地址</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(v, k) in data.NetworkSettings.Networks" :key="k">
+                <td><a @click="() => {$router.push({path: `/network/information?id=${v.NetworkID}`})}">{{ k }}</a></td>
+                <td>{{ v.IPAddress || '-' }}</td>
+                <td>{{ v.Gateway || '-' }}</td>
+                <td>{{ v.MacAddress || '-' }}</td>
+                <td>
+                  <a-button
+                    type="danger"
+                    size="small"
+                    @click="leaveNetwork(v.NetworkID, data.Id)"
+                    :loading="leaveNetworkLoading"
+                  >
+                    离开网络
+                  </a-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </a-row>
       </a-card>
 
     </div>
@@ -119,7 +185,7 @@
     <div
       v-if="tabActiveKey === 'logs'"
     >
-      <a-card style="margin-top: 24px" :bordered="false" title="用户近半年来电记录">
+      <a-card :bordered="false" title="用户近半年来电记录">
         <div class="no-data"><a-icon type="frown-o"/>暂无数据</div>
       </a-card>
     </div>
@@ -127,50 +193,6 @@
     <div
       v-if="tabActiveKey === 'stats'"
     >
-      <a-card
-        style="margin-top: 24px"
-        :bordered="false"
-        :tabList="operationTabList"
-        :activeTabKey="operationActiveTabKey"
-        @tabChange="(key) => {this.operationActiveTabKey = key}"
-      >
-        <a-table
-          v-if="operationActiveTabKey === '1'"
-          :columns="operationColumns"
-          :dataSource="operation1"
-          :pagination="false"
-        >
-          <template
-            slot="status"
-            slot-scope="status">
-            <a-badge :status="status | statusTypeFilter" :text="status | statusFilter"/>
-          </template>
-        </a-table>
-        <a-table
-          v-if="operationActiveTabKey === '2'"
-          :columns="operationColumns"
-          :dataSource="operation2"
-          :pagination="false"
-        >
-          <template
-            slot="status"
-            slot-scope="status">
-            <a-badge :status="status | statusTypeFilter" :text="status | statusFilter"/>
-          </template>
-        </a-table>
-        <a-table
-          v-if="operationActiveTabKey === '3'"
-          :columns="operationColumns"
-          :dataSource="operation3"
-          :pagination="false"
-        >
-          <template
-            slot="status"
-            slot-scope="status">
-            <a-badge :status="status | statusTypeFilter" :text="status | statusFilter"/>
-          </template>
-        </a-table>
-      </a-card>
     </div>
 
     <div
@@ -187,196 +209,175 @@
 </template>
 
 <script>
+import _ from 'lodash-es'
 import { baseMixin } from '@/store/app-mixin'
-import {
-  ContainerInspect
-} from '@/api/containers'
+import { ContainerInspect, ContainerUpdate } from '@/api/containers'
+import { NetworkList, NetworkConnect, NetworkDisconnect } from '@/api/networks'
+import OperationButtonGroup from './components/OperationButtonGroup'
 
 export default {
   name: 'ContainerInformation',
   mixins: [baseMixin],
+  components: { OperationButtonGroup },
   data () {
     return {
+      rowHeadSpan: 6,
+      rowContentSpan: 18,
       data: {
         Args: [],
         State: {},
-        HostConfig: {},
+        HostConfig: {
+          RestartPolicy: {
+            Name: ''
+          }
+        },
         Mounts: [],
         Config: {},
         NetworkSettings: {}
       },
       tabList: [
-        { key: 'detail', tab: '详细' },
+        { key: 'detail', tab: '详细信息' },
         { key: 'logs', tab: '日志' },
-        { key: 'stats', tab: '资源' },
-        { key: 'cli', tab: '连接' },
-        { key: 'attach', tab: '跟踪' }
+        { key: 'stats', tab: '资源监控' },
+        { key: 'cli', tab: '远程连接' },
+        { key: 'attach', tab: '输出跟踪' }
       ],
       tabActiveKey: 'detail',
-
-      operationTabList: [
-        {
-          key: '1',
-          tab: '操作日志一'
-        },
-        {
-          key: '2',
-          tab: '操作日志二'
-        },
-        {
-          key: '3',
-          tab: '操作日志三'
-        }
-      ],
-      operationActiveTabKey: '1',
-
-      operationColumns: [
-        {
-          title: '操作类型',
-          dataIndex: 'type',
-          key: 'type'
-        },
-        {
-          title: '操作人',
-          dataIndex: 'name',
-          key: 'name'
-        },
-        {
-          title: '执行结果',
-          dataIndex: 'status',
-          key: 'status',
-          scopedSlots: { customRender: 'status' }
-        },
-        {
-          title: '操作时间',
-          dataIndex: 'updatedAt',
-          key: 'updatedAt'
-        },
-        {
-          title: '备注',
-          dataIndex: 'remark',
-          key: 'remark'
-        }
-      ],
-      operation1: [
-        {
-          key: 'op1',
-          type: '订购关系生效',
-          name: '曲丽丽',
-          status: 'agree',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '-'
-        },
-        {
-          key: 'op2',
-          type: '财务复审',
-          name: '付小小',
-          status: 'reject',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '不通过原因'
-        },
-        {
-          key: 'op3',
-          type: '部门初审',
-          name: '周毛毛',
-          status: 'agree',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '-'
-        },
-        {
-          key: 'op4',
-          type: '提交订单',
-          name: '林东东',
-          status: 'agree',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '很棒'
-        },
-        {
-          key: 'op5',
-          type: '创建订单',
-          name: '汗牙牙',
-          status: 'agree',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '-'
-        }
-      ],
-      operation2: [
-        {
-          key: 'op2',
-          type: '财务复审',
-          name: '付小小',
-          status: 'reject',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '不通过原因'
-        },
-        {
-          key: 'op3',
-          type: '部门初审',
-          name: '周毛毛',
-          status: 'agree',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '-'
-        },
-        {
-          key: 'op4',
-          type: '提交订单',
-          name: '林东东',
-          status: 'agree',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '很棒'
-        }
-      ],
-      operation3: [
-        {
-          key: 'op2',
-          type: '财务复审',
-          name: '付小小',
-          status: 'reject',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '不通过原因'
-        },
-        {
-          key: 'op3',
-          type: '部门初审',
-          name: '周毛毛',
-          status: 'agree',
-          updatedAt: '2017-10-03  19:23:12',
-          remark: '-'
-        }
-      ]
+      portBindings: [],
+      networkList: [],
+      selectedNetwork: '',
+      restartPolicy: '',
+      updateRPLoading: false,
+      joinNetworkLoading: false,
+      leaveNetworkLoading: false
     }
   },
   created () {
-    const { $message } = this
-    ContainerInspect(this.$route.query.id)
-      .then((res) => {
-        this.data = res.data
-        console.log(this.data)
-      })
-      .catch((err) => {
-        $message.error(`获取容器信息失败: ${err.message}`)
-      })
+    this.initContainerDetail()
+    this.initConnectedNetworksList()
   },
   filters: {
-    statusFilter (status) {
-      const statusMap = {
-        'agree': '成功',
-        'reject': '驳回'
+    getstatetext: function (value) {
+      if (value === undefined) {
+        return '无'
       }
-      return statusMap[status]
+      if (value.Dead) {
+        return 'Dead'
+      }
+      if (value.Ghost && value.Running) {
+        return 'Ghost'
+      }
+      if (value.Running && value.Paused) {
+        return '运行中(暂停)'
+      }
+      if (value.Running) {
+        return '运行中'
+      }
+      if (value.Status === 'created') {
+        return '已创建'
+      }
+      return '已停止'
     },
-    statusTypeFilter (type) {
-      const statusTypeMap = {
-        'agree': 'success',
-        'reject': 'error'
+    timeFormat: function (value) {
+      var byT = (value || '').split('T')
+      var byD = (byT[1] || '').split('.')
+      return byT[0] + ' ' + byD[0]
+    },
+    shortString: function (value) {
+      return (value || '').slice(0, 12)
+    },
+    command: function (value) {
+      if (value) {
+        return value.join(' ')
       }
-      return statusTypeMap[type]
     }
   },
   methods: {
+    initContainerDetail () {
+      var _this = this
+      ContainerInspect(this.$route.query.id)
+        .then((res) => {
+          this.data = res.data
+          this.portBindings = []
+          if (_this.data.NetworkSettings.Ports) {
+            _.forEach(Object.keys(_this.data.NetworkSettings.Ports), function (key) {
+              if (_this.data.NetworkSettings.Ports[key]) {
+                _.forEach(_this.data.NetworkSettings.Ports[key], (portMapping) => {
+                  const mapping = {}
+                  mapping.container = key
+                  mapping.host = `${portMapping.HostIp}:${portMapping.HostPort}`
+                  _this.portBindings.push(mapping)
+                })
+              }
+            })
+          }
+          _this.restartPolicy = _this.data.HostConfig.RestartPolicy.Name
+        })
+        .catch((err) => {
+          this.$message.error(`获取容器信息失败: ${err.message}`)
+        })
+    },
+    initConnectedNetworksList () {
+      NetworkList()
+        .then((res) => {
+          this.networkList = res.data
+        })
+        .catch((err) => {
+          this.$message.error(`获取网络列表失败: ${err.message}`)
+        })
+    },
     handleTabChange (key) {
       console.log('')
       this.tabActiveKey = key
+    },
+    restartPolicyChange (val) {
+      this.restartPolicy = val
+      // console.log(this.restartPolicy)
+    },
+    updateRestartPolicy (id) {
+      this.updateRPLoading = true
+      ContainerUpdate(id, {RestartPolicy: this.restartPolicy})
+        .then((res) => {
+          this.$message.success(`更新容器重启策略成功`)
+        })
+        .catch((err) => {
+          this.$message.error(`更新容器重启策略失败: ${err.message}`)
+        })
+        .finally(() => {
+          this.updateRPLoading = false
+          this.initContainerDetail()
+        })
+    },
+    SelectNetwork (val) {
+      this.selectedNetwork = val
+    },
+    joinNetwork (containerID) {
+      this.joinNetworkLoading = true
+      NetworkConnect(this.selectedNetwork, containerID)
+        .then((res) => {
+          this.$message.success(`加入网络成功`)
+        })
+        .catch((err) => {
+          this.$message.error(`加入网络失败: ${err.message}`)
+        })
+        .finally(() => {
+          this.joinNetworkLoading = false
+          this.initContainerDetail()
+        })
+    },
+    leaveNetwork (networkID, containerID) {
+      this.leaveNetworkLoading = true
+      NetworkDisconnect(networkID, containerID)
+        .then((res) => {
+          this.$message.success(`离开网络成功`)
+        })
+        .catch((err) => {
+          this.$message.error(`离开网络失败: ${err.message}`)
+        })
+        .finally(() => {
+          this.leaveNetworkLoading = false
+          this.initContainerDetail()
+        })
     }
   }
 }
@@ -432,5 +433,31 @@ export default {
     .status-list {
       text-align: right;
     }
+  }
+
+  .card-row /deep/ .ant-row {
+    border-bottom: 1px solid rgb(234, 234, 234);
+    padding: 15px 0 15px;
+  }
+
+  .table {
+    width: 100%;
+  }
+  // .table tr {
+  //   height: 30px;
+  // }
+  .table tr,th,td {
+    padding: 10px 0 10px;
+  }
+  .volume-table th {
+    width: 50%;
+    font-size: 110%;
+    border-bottom: 2px solid rgb(234, 234, 234);
+  }
+  .volume-table td {
+    width: 50%;
+  }
+  .network-table th {
+    border-bottom: 2px solid rgb(234, 234, 234);
   }
 </style>

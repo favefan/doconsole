@@ -35,3 +35,23 @@ export function NetworkCreate (values) {
       data: values
   })
 }
+
+export function NetworkConnect (imageID, containerID) {
+  return request({
+      url: `${api.base}/connect/${imageID}`,
+      method: 'post',
+      data: {
+        Container: containerID
+      }
+  })
+}
+
+export function NetworkDisconnect (imageID, containerID) {
+  return request({
+      url: `${api.base}/disconnect/${imageID}`,
+      method: 'post',
+      data: {
+        Container: containerID
+      }
+  })
+}

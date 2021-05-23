@@ -33,6 +33,7 @@ func InitRouter() *gin.Engine {
 		{
 			apiV1.GET("/containers/json", v1.ContainerList)
 			apiV1.GET("/containers/json/:id", v1.ContainerInspect)
+			apiV1.POST("/containers/update/:id", v1.ContainerUpdate)
 			apiV1.GET("/containers/start", v1.ContainerStart)
 			apiV1.GET("/containers/stop", v1.ContainerStop)
 			apiV1.GET("/containers/restart", v1.ContainerRestart)
@@ -55,6 +56,8 @@ func InitRouter() *gin.Engine {
 			apiV1.GET("/networks/json", v1.NetworkList)
 			apiV1.GET("/networks/json/:id", v1.NetworkInspect)
 			apiV1.POST("/networks/create", v1.NetworkCreate)
+			apiV1.POST("/networks/connect/:id", v1.NetworkConnect)
+			apiV1.POST("/networks/disconnect/:id", v1.NetworkDisconnect)
 			apiV1.DELETE("/networks", v1.NetworksRemove)
 		}
 		// volumes
