@@ -6,11 +6,14 @@ import (
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
 	"gitee.com/favefan/doconsole/service"
+	"gitee.com/favefan/doconsole/service/websocket"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
 	"github.com/gin-gonic/gin"
+	"io"
 	"log"
 	"net/http"
+	"os"
 	_ "strconv"
 )
 
@@ -203,4 +206,70 @@ func ContainerUpdate(c *gin.Context) {
 
 	appG.Response(http.StatusOK, e.Success, "ok")
 	return
+}
+
+func ContainerLogs(c *gin.Context) {
+	appG := app.Gin{C: c}
+	ctx := context.Background()
+	containerID := c.Param("id")
+	var options service.ContainerLogsOptions
+	err := c.ShouldBindJSON(&options)
+	if err != nil {
+		log.Println(err)
+		appG.Response(http.StatusBadRequest, e.InvalidParams, err)
+		return
+	}
+
+	logs, err := global.GClient.ContainerLogs(ctx, containerID, types.ContainerLogsOptions{
+		ShowStdout: options.ShowStdout,
+		ShowStderr: options.ShowStderr,
+		Since:      options.Since,
+		Until:      options.Until,
+		Timestamps: options.Timestamps,
+		Follow:     options.Follow,
+		Tail:       options.Tail,
+		Details:    options.Details,
+	})
+	if err != nil {
+		log.Println(err)
+		appG.Response(http.StatusInternalServerError, e.Error, err)
+		return
+	}
+	defer logs.Close()
+	io.Copy(os.Stdout, logs)
+
+}
+
+func ContainerExecCreate(c *gin.Context) {
+	ctx := context.Background()
+	appG := app.Gin{C: c}
+
+	container := c.Param("id")
+	var config service.ExecConfig
+	err := c.ShouldBindJSON(&config)
+	if err != nil {
+		log.Println(err)
+		appG.Response(http.StatusBadRequest, e.InvalidParams, err)
+		return
+	}
+
+	result, err := global.GClient.ContainerExecCreate(ctx, container, types.ExecConfig{
+		User:         config.User,
+		Tty:          config.Tty,
+		AttachStdin:  config.AttachStdin,
+		AttachStderr: config.AttachStderr,
+		AttachStdout: config.AttachStdout,
+		Cmd:          config.Cmd,
+	})
+	if err != nil {
+		appG.Response(http.StatusInternalServerError, e.Error, err)
+		return
+	}
+	appG.Response(http.StatusOK, e.Success, result)
+}
+
+
+func ContainerExecAttach(c *gin.Context) {
+	container := c.Param("id")
+	websocket.TerminalHandle(c, container)
 }

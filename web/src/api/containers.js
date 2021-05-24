@@ -14,6 +14,14 @@ export function ContainerCreate (data) {
   })
 }
 
+export function ContainerExecCreate (id, data) {
+  return request({
+    url: `${api.base}/exec/${id}`,
+    method: 'post',
+    data: data
+  })
+}
+
 export function ContainerList () {
   return request({
     url: `${api.base}/json`,

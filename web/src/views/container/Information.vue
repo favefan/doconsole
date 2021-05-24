@@ -115,9 +115,9 @@
           <tbody>
             <tr v-for="vol in data.Mounts" :key="vol.Name">
               <td v-if="vol.Type === 'bind'">{{ vol.Source }}</td>
-              <td v-if="vol.Type === 'volume'"
-                ><a @click="() => {$router.push({path: `/volume/information?name=${vol.Name}`})}">{{ vol.Name }}</a></td
-              >
+              <td v-if="vol.Type === 'volume'">
+                <a @click="() => {$router.push({path: `/volume/information?name=${vol.Name}`})}">{{ vol.Name }}</a>
+              </td>
               <td>{{ vol.Destination }}</td>
             </tr>
           </tbody>
@@ -185,8 +185,14 @@
     <div
       v-if="tabActiveKey === 'logs'"
     >
-      <a-card :bordered="false" title="用户近半年来电记录">
-        <div class="no-data"><a-icon type="frown-o"/>暂无数据</div>
+      <a-card :bordered="false">
+        <a-row>
+          <a-col>
+            <pre class="log_viewer">
+              1
+            </pre>
+          </a-col>
+        </a-row>
       </a-card>
     </div>
 
@@ -198,11 +204,33 @@
     <div
       v-if="tabActiveKey === 'cli'"
     >
-    </div>
-
-    <div
-      v-if="tabActiveKey === 'attach'"
-    >
+      <!-- 终端连接配置 -->
+      <a-card class="terminal-tab" :bordered="false" title="终端连接配置">
+        <a-row>
+          <a-col :span="5">选择终端</a-col>
+          <a-col :span="19">
+            <a-select v-model="terminalConfig.terminalCommand" size="small" style="width: 33%" :disabled="terminalButtonDisabled">
+              <a-select-option value="/bin/bash" v-if="data.Platform == 'linux'">/bin/bash</a-select-option>
+              <a-select-option value="/bin/sh" v-if="data.Platform == 'linux'">/bin/sh</a-select-option>
+              <a-select-option value="powershell" v-if="data.Platform == 'windows'">powershell</a-select-option>
+              <a-select-option value="cmd.exe" v-if="data.Platform == 'windows'">cmd.exe</a-select-option>
+            </a-select>
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-col :span="5">访问用户 (User)</a-col>
+          <a-col :span="19">
+            <a-input v-model="terminalConfig.terminalUser" size="small" placeholder="root" :disabled="terminalButtonDisabled"/>
+          </a-col>
+        </a-row>
+        <a-row>
+          <a-button type="primary" size="small" @click="terminalConnect" :disabled="terminalButtonDisabled">连接</a-button>
+        </a-row>
+      </a-card>
+      <!-- 终端 -->
+      <a-card v-if="terminalRun" :bordered="false" style="margin-top: 25px" title="容器终端">
+        <container-terminal :execid="terminalExecID" :connectinfo="terminalConfig" @disconnect="terminalDisconnect"></container-terminal>
+      </a-card>
     </div>
 
   </page-header-wrapper>
@@ -211,14 +239,18 @@
 <script>
 import _ from 'lodash-es'
 import { baseMixin } from '@/store/app-mixin'
-import { ContainerInspect, ContainerUpdate } from '@/api/containers'
+import { ContainerInspect, ContainerUpdate, ContainerExecCreate } from '@/api/containers'
 import { NetworkList, NetworkConnect, NetworkDisconnect } from '@/api/networks'
 import OperationButtonGroup from './components/OperationButtonGroup'
+import ContainerTerminal from './components/ContainerTerminal'
 
 export default {
   name: 'ContainerInformation',
   mixins: [baseMixin],
-  components: { OperationButtonGroup },
+  components: {
+    OperationButtonGroup,
+    ContainerTerminal
+  },
   data () {
     return {
       rowHeadSpan: 6,
@@ -239,8 +271,8 @@ export default {
         { key: 'detail', tab: '详细信息' },
         { key: 'logs', tab: '日志' },
         { key: 'stats', tab: '资源监控' },
-        { key: 'cli', tab: '远程连接' },
-        { key: 'attach', tab: '输出跟踪' }
+        { key: 'cli', tab: '远程连接' }
+        // { key: 'attach', tab: '输出跟踪' }
       ],
       tabActiveKey: 'detail',
       portBindings: [],
@@ -249,7 +281,14 @@ export default {
       restartPolicy: '',
       updateRPLoading: false,
       joinNetworkLoading: false,
-      leaveNetworkLoading: false
+      leaveNetworkLoading: false,
+      terminalConfig: {
+        terminalCommand: '/bin/bash',
+        terminalUser: 'root'
+      },
+      terminalRun: false,
+      terminalExecID: '',
+      terminalButtonDisabled: false
     }
   },
   created () {
@@ -327,16 +366,14 @@ export default {
         })
     },
     handleTabChange (key) {
-      console.log('')
       this.tabActiveKey = key
     },
     restartPolicyChange (val) {
       this.restartPolicy = val
-      // console.log(this.restartPolicy)
     },
     updateRestartPolicy (id) {
       this.updateRPLoading = true
-      ContainerUpdate(id, {RestartPolicy: this.restartPolicy})
+      ContainerUpdate(id, { RestartPolicy: this.restartPolicy })
         .then((res) => {
           this.$message.success(`更新容器重启策略成功`)
         })
@@ -378,6 +415,36 @@ export default {
           this.leaveNetworkLoading = false
           this.initContainerDetail()
         })
+    },
+    // 终端操作
+    terminalConnect () {
+      var execConfig = {
+        User: this.terminalConfig.terminalUser,
+        Tty: true,
+        AttachStdin: true,
+        AttachStderr: true,
+        AttachStdout: true,
+        Cmd: [this.terminalConfig.terminalCommand]
+      }
+      ContainerExecCreate(this.data.Id, execConfig)
+        .then((res) => {
+          this.terminalExecID = res.data.Id
+          this.$message.success(`终端进程创建成功`)
+          this.terminalRun = true
+          this.terminalButtonDisabled = true
+        })
+        .catch((err) => {
+          this.$message.error(`终端进程创建错误: ${err.message}`)
+        })
+    },
+    terminalDisconnect () {
+      this.terminalExecID = ''
+      this.terminalConfig = {
+        terminalCommand: '/bin/bash',
+        terminalUser: 'root'
+      }
+      this.terminalRun = false
+      this.terminalButtonDisabled = false
     }
   }
 }
@@ -427,9 +494,6 @@ export default {
     .detail-layout {
       margin-left: unset;
     }
-    .text {
-
-    }
     .status-list {
       text-align: right;
     }
@@ -459,5 +523,37 @@ export default {
   }
   .network-table th {
     border-bottom: 2px solid rgb(234, 234, 234);
+  }
+
+  // log-view
+  .log_viewer {
+    height: 100%;
+    overflow-y: scroll;
+    color: black;
+    font-size: 0.85em;
+    background-color: white;
+  }
+
+  .log_viewer.wrap_lines {
+    white-space: pre-wrap;
+  }
+
+  .log_viewer .inner_line {
+    padding: 0 15px;
+    cursor: pointer;
+    margin-bottom: 0;
+  }
+
+  .log_viewer .inner_line:empty::after {
+    content: '.';
+    visibility: hidden;
+  }
+
+  .log_viewer .line_selected {
+    background-color: #c5cae9;
+  }
+
+  .terminal-tab /deep/ .ant-row {
+    margin-bottom: 15px;
   }
 </style>

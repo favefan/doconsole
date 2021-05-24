@@ -60,7 +60,6 @@ export default {
   },
   methods: {
     initDockerClient (host) {
-      // console.log(host)
       this.IconType = 'sync'
       this.isSpin = true
       DockerClientCreate(host)

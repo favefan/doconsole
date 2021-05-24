@@ -38,13 +38,13 @@ export default {
     data: {
       type: Object,
       required: true,
-      default: () => null,
+      default: () => null
     },
     call: {
       type: Function,
       default: null,
-      required: true,
-    },
+      required: true
+    }
   },
   methods: {
     start: function (id) {
@@ -77,7 +77,7 @@ export default {
           this.$message.error(`容器重启成功: ${err.message}`)
         })
     },
-    confirm(id) {
+    confirm (id) {
       ContainerRemove(id)
         .then((res) => {
           this.$message.success('容器删除成功')
@@ -87,10 +87,10 @@ export default {
           this.$message.error(`容器删除失败: ${err.message}`)
         })
     },
-    cancel(e) {
+    cancel (e) {
       console.log(e)
-    },
-  },
+    }
+  }
 }
 </script>
 

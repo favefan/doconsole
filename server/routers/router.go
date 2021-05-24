@@ -19,6 +19,7 @@ func InitRouter() *gin.Engine {
 	//	apiAuth.POST("/login", api.Login)
 	//	apiAuth.GET("/logout", api.Logout)
 	//}
+	// r.GET("/ws/:id", v1.ContainerExecAttach)
 
 	apiV1 := r.Group("/api/v1")
 	// apiV1.Use(jwt.JWT())
@@ -40,6 +41,9 @@ func InitRouter() *gin.Engine {
 			apiV1.GET("/containers/pause", v1.ContainerPause)
 			apiV1.DELETE("/containers/:id", v1.ContainerRemove)
 			apiV1.POST("/containers/create", v1.ContainerCreate)
+			apiV1.POST("/containers/exec/:id", v1.ContainerExecCreate)
+			apiV1.GET("/containers/exec/:id", v1.ContainerExecAttach)
+			apiV1.GET("/containers/logs/:id", v1.ContainerLogs)
 		}
 		// images
 		{
