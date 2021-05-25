@@ -2,7 +2,6 @@ package v1
 
 import (
 	_ "context"
-	"fmt"
 	"gitee.com/favefan/doconsole/models"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
@@ -115,7 +114,6 @@ func RegistryUpdate(c *gin.Context) {
 		Password: bodyJson["Password"].(string),
 		Comment:  "",
 	}
-	fmt.Println(bodyJson["Id"])
 
 	if err := registry.Update(bodyJson["Id"]); err != nil {
 		log.Println(err)

@@ -44,6 +44,7 @@ func InitRouter() *gin.Engine {
 			apiV1.POST("/containers/exec/:id", v1.ContainerExecCreate)
 			apiV1.GET("/containers/exec/:id", v1.ContainerExecAttach)
 			apiV1.GET("/containers/logs/:id", v1.ContainerLogs)
+			apiV1.GET("/containers/stats/:id", v1.ContainerStats)
 		}
 		// images
 		{

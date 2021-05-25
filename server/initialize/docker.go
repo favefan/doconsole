@@ -1,7 +1,6 @@
 package initialize
 
 import (
-	"fmt"
 	"github.com/docker/docker/client"
 )
 
@@ -25,7 +24,6 @@ func DockerTCPClientSetup (host string) (*client.Client, error) {
 }
 
 func CreateDockerClient (host *Host) (*client.Client, error) {
-	fmt.Println(host)
 
 	if host.ViaSocket == true {
 		return DockerLocalClientSetup()

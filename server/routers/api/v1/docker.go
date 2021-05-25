@@ -1,7 +1,6 @@
 package v1
 
 import (
-	"fmt"
 	"gitee.com/favefan/doconsole/global"
 	"gitee.com/favefan/doconsole/initialize"
 	"gitee.com/favefan/doconsole/pkg/app"
@@ -27,7 +26,6 @@ func CreateClient(c *gin.Context) {
 			"参数错误")
 		return
 	}
-	fmt.Println(host)
 	cli, err = initialize.CreateDockerClient(&host)
 	if err != nil {
 		log.Println(err)

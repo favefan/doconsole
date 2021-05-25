@@ -2,6 +2,8 @@ package v1
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	"gitee.com/favefan/doconsole/global"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
@@ -272,4 +274,29 @@ func ContainerExecCreate(c *gin.Context) {
 func ContainerExecAttach(c *gin.Context) {
 	container := c.Param("id")
 	websocket.TerminalHandle(c, container)
+}
+
+func ContainerStats(c *gin.Context) {
+	ctx := context.Background()
+	appG := app.Gin{C: c}
+
+	containerID := c.Param("id")
+	stats, err := global.GClient.ContainerStats(ctx, containerID, false)
+	if err != nil {
+		log.Println(err)
+		appG.Response(http.StatusInternalServerError, e.Error, err)
+		return
+	}
+	var parsed types.StatsJSON
+	err = json.NewDecoder(stats.Body).Decode(&parsed)
+	stats.Body.Close()
+	if err != nil {
+		if err == io.EOF {
+			return
+		}
+		log.Println(err)
+		return
+	}
+	fmt.Println(stats)
+	appG.Response(http.StatusOK, e.Success, parsed)
 }

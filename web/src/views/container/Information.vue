@@ -199,6 +199,7 @@
     <div
       v-if="tabActiveKey === 'stats'"
     >
+      <usage-charts :cid="data.Id" />
     </div>
 
     <div
@@ -243,13 +244,15 @@ import { ContainerInspect, ContainerUpdate, ContainerExecCreate } from '@/api/co
 import { NetworkList, NetworkConnect, NetworkDisconnect } from '@/api/networks'
 import OperationButtonGroup from './components/OperationButtonGroup'
 import ContainerTerminal from './components/ContainerTerminal'
+import UsageCharts from './components/UsageCharts'
 
 export default {
   name: 'ContainerInformation',
   mixins: [baseMixin],
   components: {
     OperationButtonGroup,
-    ContainerTerminal
+    ContainerTerminal,
+    UsageCharts
   },
   data () {
     return {
