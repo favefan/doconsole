@@ -43,6 +43,13 @@ export function ContainerStart (id) {
   })
 }
 
+export function ContainerLogs (id) {
+  return request({
+    url: `${api.base}/logs/${id}`,
+    method: 'get'
+  })
+}
+
 export function ContainerStats (id) {
   return request({
     url: `${api.base}/stats/${id}`,

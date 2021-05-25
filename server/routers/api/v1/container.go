@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -15,7 +16,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"os"
 	_ "strconv"
 )
 
@@ -214,23 +214,23 @@ func ContainerLogs(c *gin.Context) {
 	appG := app.Gin{C: c}
 	ctx := context.Background()
 	containerID := c.Param("id")
-	var options service.ContainerLogsOptions
-	err := c.ShouldBindJSON(&options)
-	if err != nil {
-		log.Println(err)
-		appG.Response(http.StatusBadRequest, e.InvalidParams, err)
-		return
-	}
+	//var options service.ContainerLogsOptions
+	//err := c.ShouldBindJSON(&options)
+	//if err != nil {
+	//	log.Println(err)
+	//	appG.Response(http.StatusBadRequest, e.InvalidParams, err)
+	//	return
+	//}
 
 	logs, err := global.GClient.ContainerLogs(ctx, containerID, types.ContainerLogsOptions{
-		ShowStdout: options.ShowStdout,
-		ShowStderr: options.ShowStderr,
-		Since:      options.Since,
-		Until:      options.Until,
-		Timestamps: options.Timestamps,
-		Follow:     options.Follow,
-		Tail:       options.Tail,
-		Details:    options.Details,
+		ShowStdout: true,
+		ShowStderr: true,
+		//Since:      options.Since,
+		//Until:      options.Until,
+		Timestamps: true,
+		//Follow:     false,
+		//Tail:       options.Tail,
+		Details:    true,
 	})
 	if err != nil {
 		log.Println(err)
@@ -238,8 +238,11 @@ func ContainerLogs(c *gin.Context) {
 		return
 	}
 	defer logs.Close()
-	io.Copy(os.Stdout, logs)
 
+	logsBuf := new(bytes.Buffer)
+	logsBuf.ReadFrom(logs)
+
+	appG.Response(http.StatusOK, e.Success, logsBuf.String())
 }
 
 func ContainerExecCreate(c *gin.Context) {

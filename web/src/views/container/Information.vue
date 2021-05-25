@@ -45,7 +45,7 @@
     </template>
 
     <div
-      v-if="tabActiveKey === 'detail'"
+      v-show="tabActiveKey === 'detail'"
     >
       <a-card class="card-row" :bordered="false" title="容器信息">
         <a-row>
@@ -183,27 +183,25 @@
     </div>
 
     <div
-      v-if="tabActiveKey === 'logs'"
+      v-show="tabActiveKey === 'logs'"
     >
-      <a-card :bordered="false">
+      <a-card :bordered="false" >
         <a-row>
           <a-col>
-            <pre class="log_viewer">
-              1
-            </pre>
+            <pre class="log_viewer">{{ logs }}</pre>
           </a-col>
         </a-row>
       </a-card>
     </div>
 
     <div
-      v-if="tabActiveKey === 'stats'"
+      v-show="tabActiveKey === 'stats'"
     >
       <usage-charts :cid="data.Id" />
     </div>
 
     <div
-      v-if="tabActiveKey === 'cli'"
+      v-show="tabActiveKey === 'cli'"
     >
       <!-- 终端连接配置 -->
       <a-card class="terminal-tab" :bordered="false" title="终端连接配置">
@@ -240,7 +238,7 @@
 <script>
 import _ from 'lodash-es'
 import { baseMixin } from '@/store/app-mixin'
-import { ContainerInspect, ContainerUpdate, ContainerExecCreate } from '@/api/containers'
+import { ContainerInspect, ContainerUpdate, ContainerExecCreate, ContainerLogs } from '@/api/containers'
 import { NetworkList, NetworkConnect, NetworkDisconnect } from '@/api/networks'
 import OperationButtonGroup from './components/OperationButtonGroup'
 import ContainerTerminal from './components/ContainerTerminal'
@@ -258,6 +256,7 @@ export default {
     return {
       rowHeadSpan: 6,
       rowContentSpan: 18,
+      logs: null,
       data: {
         Args: [],
         State: {},
@@ -368,8 +367,21 @@ export default {
           this.$message.error(`获取网络列表失败: ${err.message}`)
         })
     },
+    getContainerLogs () {
+      ContainerLogs(this.data.Id)
+        .then((res) => {
+          this.logs = res.data
+        })
+        .catch((err) => {
+          this.$message.error(`获取日志失败: ${err.message}`)
+        })
+    },
     handleTabChange (key) {
+      var _this = this
       this.tabActiveKey = key
+      if (key === 'logs') {
+        _this.getContainerLogs()
+      }
     },
     restartPolicyChange (val) {
       this.restartPolicy = val
@@ -530,7 +542,7 @@ export default {
 
   // log-view
   .log_viewer {
-    height: 100%;
+    height: 666px;
     overflow-y: scroll;
     color: black;
     font-size: 0.85em;
