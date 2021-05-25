@@ -8,7 +8,7 @@ Docker容器基本管理和监控系统
 
 #### 框架
 
-* 前端使用 Vue.js2.* + [Ant Design Vue Pro](https://github.com/vueComponent/ant-design-vue-pro)
+* 前端使用 Vue.js2.* + [Ant Design Vue Pro 2.*](https://github.com/vueComponent/ant-design-vue-pro) + [g2plot-vue](https://github.com/open-data-plan/g2plot-vue) + [Xterm.js 4.*](https://xtermjs.org/)
 * 后端使用 Gin + Gorm
 * 数据库采用 MariaDB 10.3.25
 * Docker容器资源操作使用官方 [Docker Engine Go SDK](https://docs.docker.com/engine/api/sdk/)
@@ -30,4 +30,7 @@ Docker容器基本管理和监控系统
 
 #### 参考
 
-[Portainer](https://github.com/portainer/portainer)
+* [Portainer](https://github.com/portainer/portainer)
+* [eddycjy的gin框架教程](https://eddycjy.com/tags/gin/)
+* [gin-vue-admin](https://github.com/flipped-aurora/gin-vue-admin)
+* [沫沫子-Docker Go 客户端-后端接口](https://lovehyh.top/detail/3ZeVa3G7k?ak=1621843607#%E5%90%8E%E7%AB%AF%E6%8E%A5%E5%8F%A3)
