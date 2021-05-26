@@ -6,17 +6,16 @@
       :title="imagesCount + ' 个镜像 - 总大小: ' + imagesTotalSize + ' MB'"
     >
       <div slot="extra">
-        <a-tooltip placement="top" class="image-use-statu">
+        <!-- <a-tooltip placement="top" class="image-use-statu">
           <template slot="title">
             <span>27.94MB/27.94MB</span>
           </template>
           <a-progress :percent="100" :show-info="false" size="small" />
           <div style="color: #87d068; float: left">使用中</div>
           <div style="color: gray; float: right">未使用</div>
-        </a-tooltip>
+        </a-tooltip> -->
         <a-tooltip title="从仓库中搜索">
           <a-button
-            type="primary"
             shape="circle"
             size="large"
             icon="search"
@@ -48,6 +47,7 @@
             icon="delete"
             style="margin-left: 10px"
             :disabled="!hasSelected"
+            :loading="deleteLoading"
           >
             批量删除
           </a-button>
@@ -70,35 +70,32 @@
         <a slot="name" slot-scope="text, record" @click="handleToInformation(record.Id.split(':')[1])">
           {{ record.RepoTags[0].split(':')[0] }}
         </a>
-        <span slot="isinuse" slot-scope="flag">
-          <a-tag :color="flag === -1 ? 'gray' : '#10D269'">
-            {{ flag === -1 ? 'UN USE' : 'IN USE' }}
-          </a-tag>
-        </span>
         <span slot="createdTime" slot-scope="timestamp">
           {{ timestamp | formatDate }}
         </span>
         <span slot="action" slot-scope="text, record">
           <template>
-            <a-popconfirm
+            <!-- <a-popconfirm
               placement="top"
               title="确定删除这个镜像?"
               ok-text="是"
               cancel-text="我再想想"
-              @confirm="deleteConfirm(item.Id)"
+              @confirm="deleteConfirm(record.Id)"
               @cancel="cancel"
             >
               <a-tooltip title="删除">
                 <a-button type="danger" shape="circle" size="large" icon="delete"></a-button>
               </a-tooltip>
-            </a-popconfirm>
+            </a-popconfirm> -->
             <a-button
-              type="circle"
+              type="primary"
+              shape="circle"
               size="large"
               icon="caret-right"
               @click="runContainer(record.Id)"
               title="用此镜像创建新容器"
               style="margin-left: 10px"
+              :loading="createLoading"
             ></a-button>
           </template>
         </span>
@@ -178,23 +175,25 @@
       @cancel="handleCancel"
     >
       <p style="margin-top: 10px">从仓库:</p>
-      <a-select style="width: 45%" placeholder="请选择" :default-value="modalPullRegistry">
+      <a-select style="width: 45%" placeholder="请选择" v-model="modalPullRegistry">
         <a-select-option value="DockerHub"> DockerHub </a-select-option>
         <a-select-option value="Custom"> Custom </a-select-option>
       </a-select>
       <p style="margin-top: 10px">拉取镜像:</p>
       <a-input-group compact>
-        <a-input style="width: 35%" placeholder="镜像名称" :default-value="modalPullImageName" />
-        <a-input style="width: 45%" placeholder="镜像标签" />
+        <a-input style="width: 35%" placeholder="镜像名称" v-model="modalPullImageName" />
+        <a-input style="width: 45%" placeholder="镜像标签" v-model="modalPullImageTag"/>
       </a-input-group>
     </a-modal>
+
   </page-header-wrapper>
 </template>
 
 <script>
 import { STable, Ellipsis } from '@/components'
 
-import { ImageList, ImageSearch } from '@/api/images'
+import { ImageList, ImageSearch, ImagePull, ImagesRemove } from '@/api/images'
+import { ContainerCreate } from '@/api/containers'
 
 const columns = [
   {
@@ -202,12 +201,6 @@ const columns = [
     dataIndex: 'Name',
     scopedSlots: { customRender: 'name' }
     // customRender: (repotag) => repotag.split('@')[0]
-  },
-  {
-    title: ' ',
-    dataIndex: 'Containers',
-    scopedSlots: { customRender: 'isinuse' }
-    // customRender: (isinuse) => isinuse === -1 ? 'UN USE' : 'IN USE'
   },
   {
     title: 'Tag',
@@ -248,6 +241,7 @@ export default {
     this.columns = columns
     return {
       imageListData: [],
+      deleteLoading: false,
       imagesCount: 0,
       imagesTotalSize: 0,
       drawerVisible: false,
@@ -258,7 +252,9 @@ export default {
       imagePullModalVisible: false,
       pullLoading: false,
       modalPullRegistry: 'DockerHub',
-      modalPullImageName: ''
+      modalPullImageName: '',
+      modalPullImageTag: '',
+      createLoading: false
     }
   },
   filters: {
@@ -313,7 +309,25 @@ export default {
       this.selectedRowKeys = selectedRowKeys
     },
     // 多选删除
-    batchRemove (e) {},
+    batchRemove () {
+      this.deleteLoading = true
+      ImagesRemove({ 'array': this.selectedRowKeys })
+        .then((res) => {
+          if (res.data !== null) {
+            this.$message.warning(`成功删除 ${res.data.length} 个镜像，删除镜像的网络有: ${res.data}`)
+          } else {
+            this.$message.success(`成功删除 ${this.selectedRowKeys.length} 个镜像`)
+          }
+        })
+        .catch((err) => {
+          this.$message.error(`镜像删除错误: ${err.response.data.data}`)
+        })
+        .finally(() => {
+          this.selectedRowKeys.splice(0, this.selectedRowKeys.length)
+          this.deleteLoading = false
+          this.freshList()
+        })
+    },
 
     // 镜像详情跳转
     handleToInformation (id) {
@@ -321,10 +335,38 @@ export default {
     },
 
     // 镜像创建容器
-    runContainer (e) {},
+    runContainer (id) {
+      this.createLoading = true
+      var data = {
+        Image: id
+      }
+      ContainerCreate(data)
+        .then((res) => {
+          this.$message.success(`容器创建成功`)
+          this.$router.push({ path: `/container/information?id=${res.data}` })
+        })
+        .catch((err) => {
+          this.$message.error(`容器创建错误: ${err.response.data.data}`)
+        })
+        .finally(() => {
+          this.createLoading = false
+          this.freshList()
+        })
+    },
 
     // 单个镜像删除确认
-    deleteConfirm (e) {},
+    // deleteConfirm (id) {
+    //   ImageRemove(id)
+    //     .then((res) => {
+    //       this.$message.success(`镜像删除成功`)
+    //       this.freshList()
+    //     })
+    //     .catch((err) => {
+    //       this.$message.error(`镜像删除错误: ${err.response.data.data}`)
+    //     })
+    //     .finally(() => {
+    //     })
+    // },
     cancel (e) {
       // console.log(e)
     },
@@ -347,14 +389,15 @@ export default {
       this.searchButtonLoading = true
       ImageSearch(value)
         .then((res) => {
-          this.searchButtonLoading = false
           this.searchResults = res.data.sort(function (a, b) {
             return b.star_count - a.star_count
           })
         })
         .catch((err) => {
-          this.searchButtonLoading = false
           this.$message.error(`搜索错误: ${err.message}`)
+        })
+        .finally(() => {
+          this.searchButtonLoading = false
         })
     },
 
@@ -366,10 +409,32 @@ export default {
     },
     handleOk (e) {
       // console.log(e)
-      this.imagePullModalVisible = false
+      this.pullLoading = true
+      var image = this.modalPullImageName
+      if (this.modalPullImageTag !== '') {
+        image += ':' + this.modalPullImageTag
+      }
+      ImagePull(image)
+        .then((res) => {
+          this.$message.success('拉取成功')
+          this.freshList()
+        })
+        .catch((err) => {
+          this.$message.error(`拉取错误: ${err.message}`)
+        })
+        .finally(() => {
+          this.pullLoading = false
+          this.imagePullModalVisible = false
+          this.modalPullRegistry = 'DockerHub'
+          this.modalPullImageName = ''
+          this.modalPullImageTag = ''
+        })
     },
     handleCancel (e) {
       this.imagePullModalVisible = false
+      this.modalPullRegistry = 'DockerHub'
+      this.modalPullImageName = ''
+      this.modalPullImageTag = ''
     }
   }
 }

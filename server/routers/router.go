@@ -24,6 +24,7 @@ func InitRouter() *gin.Engine {
 	apiV1 := r.Group("/api/v1")
 	// apiV1.Use(jwt.JWT())
 	{
+		apiV1.GET("/info", v1.Info)
 		// docker engine
 		{
 			apiV1.GET("/docker/endpoint", v1.DaemonHost)
@@ -53,7 +54,7 @@ func InitRouter() *gin.Engine {
 			apiV1.GET("/images/json/:id", v1.ImageInspect)
 			apiV1.GET("/images/history/:id", v1.ImageHistory)
 			apiV1.GET("/images/pull", v1.ImagePull)
-			apiV1.DELETE("/images/:id", v1.ImageRemove)
+			apiV1.DELETE("/images", v1.ImagesRemove)
 			apiV1.GET("/distribution/json/:id", v1.ImageInspectFromRegistry)
 		}
 		// networks

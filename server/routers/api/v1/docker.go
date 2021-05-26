@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"context"
 	"gitee.com/favefan/doconsole/global"
 	"gitee.com/favefan/doconsole/initialize"
 	"gitee.com/favefan/doconsole/pkg/app"
@@ -62,5 +63,27 @@ func ClientVersion(c *gin.Context) {
 		http.StatusOK,
 		e.Success,
 		version)
+	return
+}
+
+func Info(c *gin.Context) {
+	ctx := context.Background()
+	appG := app.Gin{C: c}
+
+	info, err := global.GClient.Info(ctx)
+	if err != nil {
+		log.Println(err)
+		appG.Response(
+			http.StatusInternalServerError,
+			e.Error,
+			err,
+		)
+		return
+	}
+	appG.Response(
+		http.StatusOK,
+		e.Success,
+		info,
+	)
 	return
 }

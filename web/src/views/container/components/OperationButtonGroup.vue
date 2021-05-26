@@ -44,6 +44,10 @@ export default {
       type: Function,
       default: null,
       required: true
+    },
+    outpage: {
+      type: Boolean,
+      default: false
     }
   },
   methods: {
@@ -78,10 +82,15 @@ export default {
         })
     },
     confirm (id) {
+      var _this = this
       ContainerRemove(id)
         .then((res) => {
           this.$message.success('容器删除成功')
-          this.call()
+          if (_this.outpage) {
+            _this.$router.push({ path: `/container/containers` })
+          } else {
+            _this.call()
+          }
         })
         .catch((err) => {
           this.$message.error(`容器删除失败: ${err.message}`)

@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"gitee.com/favefan/doconsole/global"
@@ -26,7 +27,7 @@ func ImageList(c *gin.Context) {
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
-			nil,
+			err,
 		)
 		return
 	}
@@ -46,7 +47,7 @@ func ImageInspect(c *gin.Context) {
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
-			nil,
+			err,
 		)
 		return
 	}
@@ -66,7 +67,7 @@ func ImageHistory(c *gin.Context) {
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
-			nil,
+			err,
 		)
 		return
 	}
@@ -75,26 +76,26 @@ func ImageHistory(c *gin.Context) {
 	return
 }
 
-func ImageRemove(c *gin.Context) {
+func ImagesRemove(c *gin.Context) {
 	appG := app.Gin{C: c}
 	ctx := context.Background()
-	imageID := c.Param("id")
+	var arr []string
+	removeListOfFail := arr[:]
 
-	_, err := global.GClient.ImageRemove(ctx, imageID, types.ImageRemoveOptions{
-		Force:         false,
-		PruneChildren: false,
-	})
-	if err != nil {
-		log.Println(err)
-		appG.Response(
-			http.StatusInternalServerError,
-			e.Error,
-			nil,
-		)
-		return
+	json := make(map[string][]string) //注意该结构接受的内容
+	c.BindJSON(&json)
+
+	for _, v := range  json["array"] {
+		_, err := global.GClient.ImageRemove(ctx, v, types.ImageRemoveOptions{
+			Force:         false,
+			PruneChildren: false,
+		})
+		if err != nil {
+			log.Println(err)
+			removeListOfFail = append(removeListOfFail, v)
+		}
 	}
-
-	appG.Response(http.StatusOK, e.Success, nil)
+	appG.Response(http.StatusOK, e.Success, removeListOfFail)
 	return
 }
 
@@ -115,7 +116,7 @@ func ImageSearch(c *gin.Context) {
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
-			nil,
+			err,
 		)
 		return
 	}
@@ -150,14 +151,9 @@ func ImagePull(c *gin.Context) {
 	ctx := context.Background()
 	image := c.Query("ref")
 
-	reader, err := global.GClient.ImagePull(ctx, image, types.ImagePullOptions{
-		All:           false,
-		RegistryAuth:  "",
-		PrivilegeFunc: nil,
-		Platform:      "",
-	})
+	reader, err := global.GClient.ImagePull(ctx, image, types.ImagePullOptions{})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err)
 		appG.Response(
 			http.StatusInternalServerError,
 			e.Error,
@@ -166,6 +162,10 @@ func ImagePull(c *gin.Context) {
 		return
 	}
 	defer reader.Close()
+
+	buf := new(bytes.Buffer)
+	buf.ReadFrom(reader)
+	fmt.Println(buf)
 
 	appG.Response(http.StatusOK, e.Success, "ok")
 	return

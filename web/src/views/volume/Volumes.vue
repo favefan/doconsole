@@ -52,8 +52,11 @@
         :row-selection="rowSelection"
       >
         <a slot="name" slot-scope="text, record" @click="handleToInformation(record.Name)">
-          {{ record.Name }}
+          {{ record.Name | shortName }}
         </a>
+        <p slot="mountpoint" slot-scope="text, record">
+          {{ record.Mountpoint | midString }}
+        </p>
         <!-- <a-tag
           color="cyan"
           slot="issystem"
@@ -146,8 +149,8 @@ const columns = [
   },
   {
     title: 'Mountpoint',
-    dataIndex: 'Mountpoint'
-    // customRender: (text) => is === false ? 'false' : 'true'
+    dataIndex: 'Mountpoint',
+    scopedSlots: { customRender: 'mountpoint' }
   }
 ]
 
@@ -170,6 +173,20 @@ export default {
     }
   },
   filters: {
+    shortName: function (val) {
+      var short = val
+      if (val.length >= 10) {
+        short = val.substr(0, 10)
+      }
+      return short
+    },
+    midString: function (val) {
+      var mid = val
+      if (val.length >= 50) {
+        mid = val.substr(0, 50)
+      }
+      return mid
+    }
   },
   created () {
     this.freshList()

@@ -20,10 +20,11 @@ export function ImageInspect (id) {
   })
 }
 
-export function ImageRemove (id) {
+export function ImagesRemove (a) {
   return request({
-      url: `${api.base}/${id}`,
-      method: 'delete'
+      url: `${api.base}`,
+      method: 'delete',
+      data: a
   })
 }
 
@@ -37,6 +38,13 @@ export function ImageHistory (e) {
 export function ImageSearch (e) {
   return request({
       url: `${api.base}/search?term=${e}`,
+      method: 'get'
+  })
+}
+
+export function ImagePull (ref) {
+  return request({
+      url: `${api.base}/pull?ref=${ref}`,
       method: 'get'
   })
 }

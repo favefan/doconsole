@@ -24,7 +24,7 @@
 
     <!-- OperationButtonGroup -->
     <template v-slot:extra>
-      <operation-button-group :data="{ State: data.State.Status, Id: data.Id }" :call="initContainerDetail"></operation-button-group>
+      <operation-button-group :data="{ State: data.State.Status, Id: data.Id }" :call="initContainerDetail" :outpage="true"></operation-button-group>
     </template>
 
     <!-- Status under OperationButtonGroup -->
@@ -197,7 +197,7 @@
     <div
       v-show="tabActiveKey === 'stats'"
     >
-      <usage-charts :cid="data.Id" />
+      <usage-charts :cid="this.$route.query.id" />
     </div>
 
     <div

@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"gitee.com/favefan/doconsole/global"
 	"gitee.com/favefan/doconsole/pkg/app"
 	"gitee.com/favefan/doconsole/pkg/e"
@@ -300,6 +299,5 @@ func ContainerStats(c *gin.Context) {
 		log.Println(err)
 		return
 	}
-	fmt.Println(stats)
 	appG.Response(http.StatusOK, e.Success, parsed)
 }

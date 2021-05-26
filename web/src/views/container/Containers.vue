@@ -2,11 +2,11 @@
   <page-header-wrapper>
     <a-card style="margin-top: 24px" :bordered="false" :title="containerCount + '个容器'">
       <div slot="extra">
-        <a-radio-group v-model="status">
+        <!-- <a-radio-group v-model="status">
           <a-radio-button value="all">全部</a-radio-button>
           <a-radio-button value="processing">正在运行</a-radio-button>
           <a-radio-button value="waiting">未运行</a-radio-button>
-        </a-radio-group>
+        </a-radio-group> -->
         <a-input
           style="width: 280px; margin-left: 10px"
           type="text"
@@ -29,7 +29,7 @@
 
       <a-list size="large">
         <a-list-item :key="index" v-for="(item, index) in data">
-          <a-list-item-meta :description="item.Status + ' 端口:' + item.Ports[0]">
+          <a-list-item-meta :description="item.Status + ' 端口:' + (item.Ports[0].PublicPort || '无')">
             <a-avatar
               slot="avatar"
               size="large"
@@ -42,7 +42,7 @@
           <div slot="actions" class="action-button-list">
             <operation-button-group :data="item" :call="freshList"></operation-button-group>
           </div>
-          <div slot="actions">
+          <!-- <div slot="actions">
             <a-dropdown placement="bottomRight">
               <a-menu class="more" slot="overlay">
                 <a-menu-item><a>导出为镜像</a></a-menu-item>
@@ -50,7 +50,7 @@
               </a-menu>
               <a-button type="circle" size="large" icon="more"></a-button>
             </a-dropdown>
-          </div>
+          </div> -->
         </a-list-item>
       </a-list>
     </a-card>

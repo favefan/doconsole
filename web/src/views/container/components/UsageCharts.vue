@@ -57,7 +57,8 @@ export default {
   data () {
     return {
       data: [],
-      refreshRateChange: 1000,
+      tryTime: 3,
+      refreshRateChange: 3000,
       yMax: 30,
       // preTotalTX: 0,
       // preTotalRX: 0,
@@ -143,7 +144,11 @@ export default {
           _this.updateMemoryChart(stats)
         })
         .catch((err) => {
-          _this.$message.error(`容器状态获取失败: ${err.message}`)
+          _this.tryTime -= 1
+          if (_this.tryTime === 0) {
+            _this.$message.error(`容器状态获取失败: ${err.message}`)
+            _this.tryTime = 3
+          }
         })
     },
     updateNetworkChart (stats) {

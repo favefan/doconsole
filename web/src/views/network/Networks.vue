@@ -343,7 +343,6 @@ export default {
       this.deleteLoading = true
       NetworksRemove({ 'array': this.selectedRowKeys })
         .then((res) => {
-          console.log(res.data)
           if (res.data !== null) {
             this.$message.warning(`成功删除 ${res.data.length} 个网络，删除失败的网络有: ${res.data}`)
           } else {
