@@ -29,7 +29,7 @@
 
       <a-list size="large">
         <a-list-item :key="index" v-for="(item, index) in data">
-          <a-list-item-meta :description="item.Status + ' 端口:' + (item.Ports[0].PublicPort || '无')">
+          <a-list-item-meta :description="item.Status">
             <a-avatar
               slot="avatar"
               size="large"
@@ -42,15 +42,6 @@
           <div slot="actions" class="action-button-list">
             <operation-button-group :data="item" :call="freshList"></operation-button-group>
           </div>
-          <!-- <div slot="actions">
-            <a-dropdown placement="bottomRight">
-              <a-menu class="more" slot="overlay">
-                <a-menu-item><a>导出为镜像</a></a-menu-item>
-                <a-menu-item><a>无</a></a-menu-item>
-              </a-menu>
-              <a-button type="circle" size="large" icon="more"></a-button>
-            </a-dropdown>
-          </div> -->
         </a-list-item>
       </a-list>
     </a-card>
@@ -73,6 +64,7 @@ export default {
   data () {
     return {
       data: [],
+      cacheData: [],
       status: 'all',
       containerStoppedIcon: ContainerStoppedIcon,
       containerRunningIcon: ContainerRunningIcon,
@@ -80,24 +72,24 @@ export default {
       filterKey: ''
     }
   },
-  // filters: {
-  //   stateFilter (state) {
-  //     // console.log(originVal)
-  //     if (state === 'running') {
-  //       return 'pause'
-  //     } else {
-  //       return 'caret-right'
-  //     }
-  //   }
-  // },
   created () {
     this.freshList()
+  },
+  computed: {
+    filterList: function () {
+      var key = this.filterKey
+      var list = this.cacheData
+      return list.filter(function (item) {
+        return item.Names[0].toLowerCase().indexOf(key.toLowerCase()) !== -1
+      })
+    }
   },
   methods: {
     freshList () {
       ContainerList()
         .then((res) => {
-          this.data = res.data
+          this.cacheData = res.data
+          this.data = this.cacheData
           this.containerCount = res.data.length
         })
         .catch((err) => {
@@ -105,12 +97,12 @@ export default {
         })
     },
     filterChange () {
-      // var key = this.filterKey.trim()
-      // if (key.length === 0) {
-      //   this.listData = this.networkListData
-      // } else {
-      //   this.listData = this.filterList
-      // }
+      var key = this.filterKey.trim()
+      if (key.length === 0) {
+        this.data = this.cacheData
+      } else {
+        this.data = this.filterList
+      }
     },
     handleToContainerInformation (id) {
       this.$router.push({ path: `/container/information?id=${id}` })

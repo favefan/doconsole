@@ -53,10 +53,10 @@ replace (
 	gitee.com/favefan/doconsole/middlewares => ../doconsole/middleware
 	gitee.com/favefan/doconsole/middlewares/jwt => ../doconsole/middleware/jwt
 	gitee.com/favefan/doconsole/models => ../doconsole/models
+	gitee.com/favefan/doconsole/pkg/app => ../doconsole/pkg/app
+	gitee.com/favefan/doconsole/pkg/e => ../doconsole/pkg/e
 	// gitee.com/favefan/doconsole/pkg/setting => ../doconsole/pkg/setting
 	gitee.com/favefan/doconsole/pkg/util => ../doconsole/pkg/util
-	gitee.com/favefan/doconsole/pkg/e => ../doconsole/pkg/e
-	gitee.com/favefan/doconsole/pkg/app => ../doconsole/pkg/app
 	gitee.com/favefan/doconsole/routers => ../doconsole/routers
 	gitee.com/favefan/doconsole/routers/api => ../doconsole/routers/api
 	gitee.com/favefan/doconsole/service => ../doconsole/service

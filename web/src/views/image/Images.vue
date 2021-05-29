@@ -6,14 +6,6 @@
       :title="imagesCount + ' 个镜像 - 总大小: ' + imagesTotalSize + ' MB'"
     >
       <div slot="extra">
-        <!-- <a-tooltip placement="top" class="image-use-statu">
-          <template slot="title">
-            <span>27.94MB/27.94MB</span>
-          </template>
-          <a-progress :percent="100" :show-info="false" size="small" />
-          <div style="color: #87d068; float: left">使用中</div>
-          <div style="color: gray; float: right">未使用</div>
-        </a-tooltip> -->
         <a-tooltip title="从仓库中搜索">
           <a-button
             shape="circle"
@@ -52,7 +44,14 @@
             批量删除
           </a-button>
         </a-popconfirm>
-        <a-input style="width: 280px; margin-bottom: 15px; margin-left: 10px" allowClear placeholder="列表过滤">
+        <a-input
+          style="width: 280px; margin-bottom: 15px; margin-left: 10px"
+          type="text"
+          placeholder="列表过滤"
+          v-model="filterKey"
+          @change="filterChange"
+          allowClear
+        >
           <a-tooltip slot="prefix" title="Filter">
             <a-icon type="filter" style="color: rgba(0, 0, 0, 0.45)" />
           </a-tooltip>
@@ -75,18 +74,6 @@
         </span>
         <span slot="action" slot-scope="text, record">
           <template>
-            <!-- <a-popconfirm
-              placement="top"
-              title="确定删除这个镜像?"
-              ok-text="是"
-              cancel-text="我再想想"
-              @confirm="deleteConfirm(record.Id)"
-              @cancel="cancel"
-            >
-              <a-tooltip title="删除">
-                <a-button type="danger" shape="circle" size="large" icon="delete"></a-button>
-              </a-tooltip>
-            </a-popconfirm> -->
             <a-button
               type="primary"
               shape="circle"
@@ -240,7 +227,9 @@ export default {
   data () {
     this.columns = columns
     return {
+      filterKey: '',
       imageListData: [],
+      cacheData: [],
       deleteLoading: false,
       imagesCount: 0,
       imagesTotalSize: 0,
@@ -278,6 +267,13 @@ export default {
     this.freshList()
   },
   computed: {
+    filterList: function () {
+      var key = this.filterKey
+      var list = this.cacheData
+      return list.filter(function (item) {
+        return item.RepoTags[0].split(':')[0].toLowerCase().indexOf(key.toLowerCase()) !== -1
+      })
+    },
     rowSelection () {
       return {
         selectedRowKeys: this.selectedRowKeys,
@@ -294,7 +290,8 @@ export default {
     freshList () {
       ImageList()
         .then((res) => {
-          this.imageListData = res.data
+          this.cacheData = res.data
+          this.imageListData = this.cacheData
           this.imagesCount = res.data.length
           this.imagesTotalSize = (res.data.reduce((sum, e) => sum + Number(e.Size), 0) / 1000000.0).toFixed(2)
         })
@@ -302,7 +299,14 @@ export default {
           this.$message.error(`更新镜像列表失败: ${err.message}`)
         })
     },
-
+    filterChange () {
+      var key = this.filterKey.trim()
+      if (key.length === 0) {
+        this.imageListData = this.cacheData
+      } else {
+        this.imageListData = this.filterList
+      }
+    },
     // 多选操作
     onSelectChange (selectedRowKeys) {
       // console.log('selectedRowKeys changed: ', selectedRowKeys)

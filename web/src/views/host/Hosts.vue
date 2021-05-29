@@ -294,6 +294,10 @@ export default {
     drawerSubmit (e) {
       e.preventDefault()
       // console.log(this.formData)
+      this.formData.DockerEngineURL = 'tcp://' + this.formData.DockerEngineURL.replace(/.*?:\/\//g, '')
+      if (this.formData.HostIP === '') {
+          this.formData.HostIP = this.formData.DockerEngineURL.split(':')[0]
+        }
       if (this.formData.Name.trim().length === 0) {
         this.$message.warning('名称不能为空, 且不能包含空格, 请重新输入')
       } else if (this.formData.ViaSocket === false &&

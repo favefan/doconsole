@@ -81,7 +81,7 @@ func InitRouter() *gin.Engine {
 			apiV1.GET("/registries/json/:id", v1.RegistryInspect)
 			apiV1.DELETE("/registries", v1.RegistriesRemove)
 		}
-		// registries
+		// hosts
 		{
 			apiV1.POST("/hosts/create", v1.HostCreate)
 			apiV1.PUT("/hosts", v1.HostUpdate)

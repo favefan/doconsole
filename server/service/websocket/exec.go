@@ -22,6 +22,7 @@ var upgrader = websocket.Upgrader{
 
 func TerminalHandle(c *gin.Context, execID string) {
 	appG := app.Gin{C: c}
+
 	// websocket握手
 	websocketConn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
