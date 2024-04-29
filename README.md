@@ -15,10 +15,9 @@ Docker容器基本管理和监控系统
 
 #### 环境
 
-* Go 1.16.*
-* Windows 10 20H2 64位
-* Ubuntu 20.04 LTS (Windows Subsystem for Linux 2 / WSL2)
-* Docker 20.10.* (Docker后端运行在WSL2中)
+* Go += 1.16.*
+* Ubuntu += 20.04 LTS
+* Docker += 20.10.* (Docker后端运行在WSL2中)
 * Node.js 14.* LTS
 
 #### 工具
